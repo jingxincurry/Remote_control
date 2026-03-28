@@ -166,6 +166,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="RemoteCtrl.cpp" />
+    <ClCompile Include="源1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RemoteCtrl.rc" />
