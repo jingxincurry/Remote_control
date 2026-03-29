@@ -7,7 +7,6 @@
 CServerSocket* CServerSocket::m_instance = NULL;
 CServerSocket::CHelper CServerSocket::m_helper;
 
-
 CServerSocket* pserver = CServerSocket::getInstance();
 
 bool CServerSocket::InitSocket() {
@@ -40,17 +39,29 @@ bool CServerSocket::AcceptClient() {
     
 }
 
+
+#define BUFFER_SIZE 4096
 int CServerSocket::DealCommand() {
-    if (m_client == -1) return false;
-    char buffer[1024];
+    if (m_client == -1) return -1;
+    //char buffer[1024];
+    char* buffer = new char[BUFFER_SIZE];
+    memset(buffer, 0, BUFFER_SIZE);
+    size_t index = 0;
     while (true) {
-        int len = recv(m_client, buffer, sizeof(buffer), 0);
+        size_t len = recv(m_client, buffer + index, BUFFER_SIZE - index, 0);
         if (len <= 0) {
             return -1;
         }
-        //TODO:
+        index += len;
+        len = index;
+        m_packet = CPacket::CPacket((BYTE*)buffer, len);
+        if (len > 0) {
+            memmove(buffer, buffer + len, BUFFER_SIZE - len);
+            index -= len;
+            return m_packet.sCmd;
+        }
     }
-    
+    return -1;
 }
 
 bool CServerSocket::Send(const char* pData, int nSize) {

@@ -3,6 +3,87 @@
 #include "pch.h"
 #include "framework.h"
 
+class CPacket
+{
+public:
+	CPacket()
+		:sHead(0), nLength(0), sCmd(0), sSum(0) 
+	{};
+	CPacket(const CPacket& pack) {
+		sHead = pack.sHead;
+		nLength = pack.nLength;
+		sCmd = pack.sCmd;
+		strData = pack.strData;
+		sSum = pack.sSum;
+	}
+	CPacket(const BYTE* pData, size_t& nSize) {
+		size_t i = 0;
+		//查找包头
+		for (; i < nSize; i++) {  // i + 1 ?
+			if (*(WORD*)(pData + i) == 0xFEFF) {
+				sHead = *(WORD*)(pData + i);
+				i += 2;
+				break;
+			}
+		}
+		// 2. 至少还要有 nLength + sCmd + sSum
+		if (i + 4 + 2 + 2 > nSize) {  //包数据可能不全，或者包头未能完全收到
+			nSize = 0;
+			return;
+		}
+		// 3. 读取长度
+		nLength = *(DWORD*)(pData + i); i += 4;  
+		if (nLength + i > nSize) {  //包未完全收到，就返回，解析失败
+			nSize = 0;
+			return;
+		}
+		// 5. 读取命令字
+		sCmd = *(WORD*)(pData + i); i += 2;
+		// 6. 读取数据区
+		if (nLength > 4) {
+			strData.resize(nLength - 2 - 2);
+			memcpy((void*)strData.c_str(), pData + i, nLength - 4);
+			i += nLength - 4;
+		}
+		//7.读取校验和
+		sSum = *(WORD*)(pData + i); i += 2;
+		
+		// 8. 计算校验和
+		WORD sum = 0;
+		for (size_t j = 0; j < strData.size(); j++) {
+			sum += BYTE(strData[j]) & 0xFF;
+		}
+		// 9. 校验
+		if (sum == sSum) {
+			nSize = i;  //head length data...
+			return;
+		}
+		nSize = 0;
+
+	}
+	~CPacket() {};
+	CPacket& operator=(const CPacket& pack) {
+		if (this != &pack) {
+			sHead = pack.sHead;
+			nLength = pack.nLength;
+			sCmd = pack.sCmd;
+			strData = pack.strData;
+			sSum = pack.sSum;
+		}
+		return *this;
+		
+	}
+public:
+	//[包头 sHead] [长度 nLength] [命令 sCmd] [数据 strData] [校验 sSum]
+	WORD sHead; //固定位 FE FF                     2
+	DWORD nLength; //包长度（从控制命令开始，到和校验结束）     4
+	// nLength = 2 + 数据长度 + 2         所以 数据长度 = nLength - 4
+	WORD sCmd;  //控制命令				2
+	std::string strData; //包数据    不确定
+	WORD sSum; //和校验            2
+};
+
+
 class CServerSocket
 {
 public:
@@ -24,6 +105,7 @@ public:
 private:
 	SOCKET m_client;
 	SOCKET m_sock;
+	CPacket m_packet;
 	CServerSocket& operator=(const CServerSocket& ss) {};
 	CServerSocket(const CServerSocket& ss) {
 		m_client = ss.m_client;
