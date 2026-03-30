@@ -131,6 +131,8 @@ public:
 	bool Send(const char* pData, int nSize);
 
 	bool Send(CPacket& pack);
+
+	bool GetFilePath(std::string& strPath);
 private:
 	SOCKET m_client;
 	SOCKET m_sock;
