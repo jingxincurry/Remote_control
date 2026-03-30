@@ -105,6 +105,51 @@ int MakeDirectoryInfo() {
     CServerSocket::getInstance()->Send(pack);
     return 0;
 }
+
+int RunFile() {
+    std::string strPath;
+	CServerSocket::getInstance()->GetFilePath(strPath);
+	ShellExecuteA(NULL, NULL, strPath.c_str(), NULL, NULL, SW_SHOW);
+    CPacket pack(3, NULL, 0);
+    CServerSocket::getInstance()->Send(pack);
+    return 0;
+}
+
+int DownloadFile() {
+    std::string strPath;
+    CServerSocket::getInstance()->GetFilePath(strPath);
+    long long data = 0;
+    FILE* fp = NULL;
+    errno_t err = fopen_s(&fp, strPath.c_str(), "rb");
+    
+    if (err != 0) {
+        CPacket pack(4, (BYTE*)&data, 8);
+        CServerSocket::getInstance()->Send(pack);
+        return -1;
+    }
+
+    if (fp != NULL){
+        fseek(fp, 0, SEEK_END);
+        data = _ftelli64(fp);
+        CPacket head(4, (BYTE*)&data, 8);
+        fseek(fp, 0, SEEK_SET);
+        char buffer[1024];
+        size_t nSize = 0;
+        do {
+            nSize = fread(buffer, 1, sizeof(buffer), fp);
+            if (nSize > 0) {
+                CPacket pack(4, (BYTE*)buffer, nSize);
+                CServerSocket::getInstance()->Send(pack);
+            }
+        } while (nSize >= 1024); //1024字节为一个包,读
+        fclose(fp);
+    }
+	
+    CPacket pack(4, NULL, 0);
+    CServerSocket::getInstance()->Send(pack);
+    
+	return 0;
+}
 int main()
 {
     int nRetCode = 0;
@@ -150,6 +195,12 @@ int main()
 				break;
 			case 2: //查看指定路径下的文件和文件夹
                 MakeDirectoryInfo();
+				break;
+            case 3: //打开文件
+                RunFile();
+				break;
+            case 4: // 下载文件
+                DownloadFile();
 				break;
             }
             

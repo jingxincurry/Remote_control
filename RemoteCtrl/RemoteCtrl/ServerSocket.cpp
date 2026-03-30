@@ -75,7 +75,7 @@ bool CServerSocket::Send(CPacket& pack) {
 }
 
 bool CServerSocket::GetFilePath(std::string& strPath) {
-    if (m_packet.sCmd == 2) {
+    if (m_packet.sCmd >= 2 &&  m_packet.sCmd <= 4 ) {
         strPath = m_packet.strData;
 		return true;
     }
