@@ -118,6 +118,23 @@ public:
 };
 #pragma pack(pop)
 
+typedef struct MouseEvent{
+	MouseEvent(){
+		nAction = 0;
+		nButton = -1;
+		ptXY.x = 0;
+		ptXY.y = 0;
+	}
+	//nButton：0表示左键，1表示右键，2表示中键，4没有按键
+	//nAction: 0表示单击，1表示双击，2表示按下，3表示放开，4不作处理
+
+	WORD nAction; // 点击，移动，双击 
+	WORD nButton; // 左键，右键，中键
+	POINT ptXY; //坐标
+
+}MOUSEEV, *PMOUSEEV;
+
+
 class CServerSocket
 {
 public:
@@ -126,6 +143,7 @@ public:
 			m_instance = new CServerSocket();
 		}
 		return m_instance;
+
 	};
 
 	bool InitSocket();
@@ -139,6 +157,9 @@ public:
 	bool Send(CPacket& pack);
 
 	bool GetFilePath(std::string& strPath);
+
+	bool GetMouseEvent(MOUSEEV& mouse);
+
 private:
 	SOCKET m_client;
 	SOCKET m_sock;

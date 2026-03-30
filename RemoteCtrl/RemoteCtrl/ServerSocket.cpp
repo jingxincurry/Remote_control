@@ -81,3 +81,11 @@ bool CServerSocket::GetFilePath(std::string& strPath) {
     }
 	return false;
 }
+
+bool CServerSocket::GetMouseEvent(MOUSEEV& mouse) {
+    if (m_packet.sCmd == 5) {
+		memcpy(&mouse, m_packet.strData.c_str(), sizeof(MOUSEEV));
+        return true;
+    }
+	return false;
+}
