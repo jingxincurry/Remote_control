@@ -3,12 +3,26 @@
 #include "pch.h"
 #include "framework.h"
 
+#pragma pack(push)
+#pragma pack(1) 
+
 class CPacket
 {
 public:
 	CPacket()
 		:sHead(0), nLength(0), sCmd(0), sSum(0) 
 	{};
+	CPacket(WORD nCmd, const BYTE* pData, size_t nSize) {
+		sHead = 0xFEFF;
+		nLength = nSize + 4;
+		sCmd = nCmd;
+		strData.resize(nSize);
+		memcpy((void*)strData.c_str(), pData, nSize);
+		sSum = 0;
+		for (size_t j = 0; j < strData.size(); j++) {
+			sSum += BYTE(strData[j]) & 0xFF; 
+		}
+	}
 	CPacket(const CPacket& pack) {
 		sHead = pack.sHead;
 		nLength = pack.nLength;
@@ -73,6 +87,19 @@ public:
 		return *this;
 		
 	}
+	int Size() {
+		return nLength + 2 + 4; //head length data sum
+	}
+	const char* Data() {
+		strOut.resize(nLength + 2 + 4);
+		BYTE* pData = (BYTE*)strOut.c_str();
+		*(WORD*)pData = sHead; pData += 2;
+		*(DWORD*)pData = nLength; pData += 4;
+		*(WORD*)pData = sCmd; pData += 2;
+		memcpy(pData, strData.c_str(), strData.size()); pData += strData.size();
+		*(WORD*)pData = sSum;
+		return strOut.c_str();
+	}
 public:
 	//[包头 sHead] [长度 nLength] [命令 sCmd] [数据 strData] [校验 sSum]
 	WORD sHead; //固定位 FE FF                     2
@@ -81,8 +108,9 @@ public:
 	WORD sCmd;  //控制命令				2
 	std::string strData; //包数据    不确定
 	WORD sSum; //和校验            2
+	std::string strOut;
 };
-
+#pragma pack(pop)
 
 class CServerSocket
 {
@@ -102,6 +130,7 @@ public:
 
 	bool Send(const char* pData, int nSize);
 
+	bool Send(CPacket& pack);
 private:
 	SOCKET m_client;
 	SOCKET m_sock;
