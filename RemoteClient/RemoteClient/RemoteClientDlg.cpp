@@ -87,6 +87,7 @@ void CRemoteClientDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_IPAddress(pDX, IDC_IPADDRESS_Serv, m_serv_address);
 	DDX_Text(pDX, IDC_EDIT_PORT, m_nPort);
 	DDX_Control(pDX, IDC_TREE_DIR, m_Tree);
+	DDX_Control(pDX, IDC_LIST_FILE, m_List);
 }
 
 BEGIN_MESSAGE_MAP(CRemoteClientDlg, CDialogEx)
@@ -97,6 +98,8 @@ BEGIN_MESSAGE_MAP(CRemoteClientDlg, CDialogEx)
 	ON_NOTIFY(IPN_FIELDCHANGED, IDC_IPADDRESS_Serv, &CRemoteClientDlg::OnIpnFieldchangedIpaddressServ)
 	ON_BN_CLICKED(IDC_BTN_FILEINFO, &CRemoteClientDlg::OnBnClickedBtnFileinfo)
 	ON_NOTIFY(NM_DBLCLK, IDC_TREE_DIR, &CRemoteClientDlg::OnNMDblclkTreeDir)
+	ON_NOTIFY(NM_CLICK, IDC_TREE_DIR, &CRemoteClientDlg::OnNMClickTreeDir)
+	ON_NOTIFY(NM_RCLICK, IDC_LIST_FILE, &CRemoteClientDlg::OnNMRClickListFile)
 END_MESSAGE_MAP()
 
 
@@ -259,10 +262,10 @@ void CRemoteClientDlg::DeleteTreeChildrenItem(HTREEITEM hTree)
 	} while (hSub != NULL);
 }
 
-void CRemoteClientDlg::OnNMDblclkTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
+void CRemoteClientDlg::LoadFileInfo()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	*pResult = 0;
+	
 	CPoint ptMouse;
 	GetCursorPos(&ptMouse);
 	m_Tree.ScreenToClient(&ptMouse);
@@ -270,10 +273,11 @@ void CRemoteClientDlg::OnNMDblclkTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
 	if (hTreeSelect == NULL) {
 		return;
 	}
-	if(m_Tree.GetChildItem(hTreeSelect) == NULL){
+	if (m_Tree.GetChildItem(hTreeSelect) == NULL) {
 		return;
 	}
 	DeleteTreeChildrenItem(hTreeSelect);
+	m_List.DeleteAllItems();
 	CString strPath = GetPath(hTreeSelect);
 	int ret = SendCommandPacket(2, false, (BYTE*)(LPCTSTR)strPath, (strPath.GetLength() + 1) * sizeof(TCHAR));
 	if (ret != 2) {
@@ -283,41 +287,38 @@ void CRemoteClientDlg::OnNMDblclkTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 	PFILEINFO pInfo = (PFILEINFO)CClientSocket::getInstance()->GetPacket().strData.c_str();
 	CClientSocket* pClient = CClientSocket::getInstance();
-    while (pInfo->HasNext)
+	while (pInfo->HasNext)
 	{
 		TRACE("[%s] isdir %d\r\n", pInfo->szFileName, pInfo->IsDirectory);
-		if(pInfo->IsDirectory){
-			if(CString(pInfo->szFileName) == "." || CString(pInfo->szFileName) == ".."){
+		if (pInfo->IsDirectory) {
+			if (CString(pInfo->szFileName) == "." || CString(pInfo->szFileName) == "..") {
 				int cmd = pClient->DealCommand();
 				TRACE("ack:%d\r\n", cmd);
 				if (cmd < 0) {
 					TRACE("命令处理失败!!!\r\n");
 					break;
 				}
-                CPacket& pack = CClientSocket::getInstance()->GetPacket();
-				if (pack.strData.size() < sizeof(FILEINFO)) {
-					TRACE("目录数据包长度异常: %zu\r\n", pack.strData.size());
-					break;
-				}
-				pInfo = (PFILEINFO)pack.strData.data();
+				pInfo = (PFILEINFO)CClientSocket::getInstance()->GetPacket().strData.c_str();
 				continue;
 			}
-		}
-		
-		HTREEITEM hTemp = m_Tree.InsertItem(pInfo->szFileName, hTreeSelect, TVI_LAST);
-		if (pInfo->IsDirectory) {
+			HTREEITEM hTemp = m_Tree.InsertItem(pInfo->szFileName, hTreeSelect, TVI_LAST);
 			m_Tree.InsertItem("", hTemp, TVI_LAST);
 		}
+		else {
+			m_List.InsertItem(0, pInfo->szFileName);
+		}
+
+		
 		int cmd = pClient->DealCommand();
 		TRACE("ack:%d\r\n", cmd);
 		if (cmd < 0) {
 			TRACE("命令处理失败!!!\r\n");
 			break;
 		}
-        
+
 		pInfo = (PFILEINFO)CClientSocket::getInstance()->GetPacket().strData.c_str();
 	}
-	
+
 	//while (pInfo->HasNext) {
 	//	int cmd = pClient->DealCommand();
 	//	TRACE("ack:%d\r\n", cmd);
@@ -326,3 +327,34 @@ void CRemoteClientDlg::OnNMDblclkTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
 	pClient->CloseSocket();
 }
 
+void CRemoteClientDlg::OnNMDblclkTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = 0;
+	LoadFileInfo();
+}
+
+
+void CRemoteClientDlg::OnNMClickTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+	LoadFileInfo();
+}
+
+void CRemoteClientDlg::OnNMRClickListFile(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+	CPoint ptMouse, ptList;  //获取鼠标位置
+	GetCursorPos(&ptMouse); 
+	ptList = ptMouse;
+	m_List.ScreenToClient(&ptList); //屏幕坐标转换为客户区坐标
+	int ListSelected = m_List.HitTest(ptList);  //获取鼠标所在的行
+	if (ListSelected < 0) return;  //如果没有选中任何行则返回
+	CMenu menu;
+	menu.LoadMenuA(IDR_MENU_RCLICK);
+	CMenu* pPupup = menu.GetSubMenu(0); //获取第一个子菜单
+	if(pPupup != NULL)
+        pPupup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, ptMouse.x, ptMouse.y, this);
+}
