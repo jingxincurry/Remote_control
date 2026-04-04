@@ -23,8 +23,19 @@ public:
 
 private:
 
-
-
+	CString GetPath(HTREEITEM hTree);
+	void DeleteTreeChildrenItem(HTREEITEM hTree);
+	//1 查看磁盘分区
+	//2 查看指定目录下的文件
+	//3 打开文件
+	//4 下载文件
+	//9 删除文件
+	//5 鼠标操作
+	//6 发送屏幕内容
+	//7 锁机
+	//8 解锁
+	//1981 测试连接
+	//返回值：是命令号，如果小于0则是错误
 	int SendCommandPacket(int nCmd, bool bAutoClose = true, BYTE* pData = NULL, size_t nLength = 0);
 
 
@@ -48,4 +59,5 @@ public:
 	afx_msg void OnIpnFieldchangedIpaddressServ(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedBtnFileinfo();
 	CTreeCtrl m_Tree;
+	afx_msg void OnNMDblclkTreeDir(NMHDR* pNMHDR, LRESULT* pResult);
 };

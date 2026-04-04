@@ -75,6 +75,7 @@ bool CServerSocket::Send(const char* pData, int nSize) {
 
 bool CServerSocket::Send(CPacket& pack) {
     if (m_client == -1) return false;
+	Dump((BYTE*)pack.Data(), pack.Size());
     return send(m_client, pack.Data(), pack.Size(), 0) > 0;
 }
 

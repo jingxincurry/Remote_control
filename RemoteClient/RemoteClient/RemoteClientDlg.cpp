@@ -96,6 +96,7 @@ BEGIN_MESSAGE_MAP(CRemoteClientDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_TEST, &CRemoteClientDlg::OnBnClickedBtnTest)
 	ON_NOTIFY(IPN_FIELDCHANGED, IDC_IPADDRESS_Serv, &CRemoteClientDlg::OnIpnFieldchangedIpaddressServ)
 	ON_BN_CLICKED(IDC_BTN_FILEINFO, &CRemoteClientDlg::OnBnClickedBtnFileinfo)
+	ON_NOTIFY(NM_DBLCLK, IDC_TREE_DIR, &CRemoteClientDlg::OnNMDblclkTreeDir)
 END_MESSAGE_MAP()
 
 
@@ -223,7 +224,7 @@ void CRemoteClientDlg::OnBnClickedBtnFileinfo()
 		if (drivers[i] == ',') {
 			dr += ":";
 			HTREEITEM hTemp = m_Tree.InsertItem(dr.c_str(), TVI_ROOT, TVI_LAST);
-           m_Tree.InsertItem(_T(""), hTemp, TVI_LAST);
+			m_Tree.InsertItem(_T(""), hTemp, TVI_LAST);
 			dr.clear();
 			continue;
 		}
@@ -236,3 +237,92 @@ void CRemoteClientDlg::OnBnClickedBtnFileinfo()
 		m_Tree.InsertItem(_T(""), hTemp, TVI_LAST);
 	}
 }
+
+
+CString CRemoteClientDlg::GetPath(HTREEITEM hTree)
+{
+	CString strRet, strTmp;
+	do {
+		strTmp = m_Tree.GetItemText(hTree);
+		strRet = strTmp + '\\' + strRet;
+		hTree = m_Tree.GetParentItem(hTree);
+	} while (hTree != NULL);
+	return strRet;
+}
+
+void CRemoteClientDlg::DeleteTreeChildrenItem(HTREEITEM hTree)
+{
+	HTREEITEM hSub = NULL;
+	do {
+		hSub = m_Tree.GetChildItem(hTree);
+		if (hSub != NULL)m_Tree.DeleteItem(hSub);
+	} while (hSub != NULL);
+}
+
+void CRemoteClientDlg::OnNMDblclkTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+	CPoint ptMouse;
+	GetCursorPos(&ptMouse);
+	m_Tree.ScreenToClient(&ptMouse);
+	HTREEITEM hTreeSelect = m_Tree.HitTest(ptMouse, 0);
+	if (hTreeSelect == NULL) {
+		return;
+	}
+	if(m_Tree.GetChildItem(hTreeSelect) == NULL){
+		return;
+	}
+	DeleteTreeChildrenItem(hTreeSelect);
+	CString strPath = GetPath(hTreeSelect);
+	int ret = SendCommandPacket(2, false, (BYTE*)(LPCTSTR)strPath, (strPath.GetLength() + 1) * sizeof(TCHAR));
+	if (ret != 2) {
+		TRACE("命令处理失败!!! ret=%d\r\n", ret);
+		CClientSocket::getInstance()->CloseSocket();
+		return;
+	}
+	PFILEINFO pInfo = (PFILEINFO)CClientSocket::getInstance()->GetPacket().strData.c_str();
+	CClientSocket* pClient = CClientSocket::getInstance();
+    while (pInfo->HasNext)
+	{
+		TRACE("[%s] isdir %d\r\n", pInfo->szFileName, pInfo->IsDirectory);
+		if(pInfo->IsDirectory){
+			if(CString(pInfo->szFileName) == "." || CString(pInfo->szFileName) == ".."){
+				int cmd = pClient->DealCommand();
+				TRACE("ack:%d\r\n", cmd);
+				if (cmd < 0) {
+					TRACE("命令处理失败!!!\r\n");
+					break;
+				}
+                CPacket& pack = CClientSocket::getInstance()->GetPacket();
+				if (pack.strData.size() < sizeof(FILEINFO)) {
+					TRACE("目录数据包长度异常: %zu\r\n", pack.strData.size());
+					break;
+				}
+				pInfo = (PFILEINFO)pack.strData.data();
+				continue;
+			}
+		}
+		
+		HTREEITEM hTemp = m_Tree.InsertItem(pInfo->szFileName, hTreeSelect, TVI_LAST);
+		if (pInfo->IsDirectory) {
+			m_Tree.InsertItem("", hTemp, TVI_LAST);
+		}
+		int cmd = pClient->DealCommand();
+		TRACE("ack:%d\r\n", cmd);
+		if (cmd < 0) {
+			TRACE("命令处理失败!!!\r\n");
+			break;
+		}
+        
+		pInfo = (PFILEINFO)CClientSocket::getInstance()->GetPacket().strData.c_str();
+	}
+	
+	//while (pInfo->HasNext) {
+	//	int cmd = pClient->DealCommand();
+	//	TRACE("ack:%d\r\n", cmd);
+	//	//TODO: 处理文件信息
+	//}
+	pClient->CloseSocket();
+}
+
