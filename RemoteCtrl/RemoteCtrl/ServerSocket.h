@@ -159,7 +159,16 @@ public:
 	bool GetFilePath(std::string& strPath);
 
 	bool GetMouseEvent(MOUSEEV& mouse);
+	
+	CPacket& GetPacket()
+	{
+		return m_packet;
+	}
 
+	void CloseClient() {
+		closesocket(m_client);
+		m_client = INVALID_SOCKET;
+	}
 private:
 	SOCKET m_client;
 	SOCKET m_sock;

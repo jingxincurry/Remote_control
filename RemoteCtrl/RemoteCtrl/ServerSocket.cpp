@@ -34,6 +34,7 @@ bool CServerSocket::AcceptClient() {
     sockaddr_in client_adr;
     int client_len = sizeof(client_adr);
     m_client = accept(m_sock, (sockaddr*)&client_adr, &client_len);
+	TRACE("AcceptClient client %d\r\n", m_client);
     if (m_client == -1) return false;
     return true;
     
@@ -50,6 +51,7 @@ int CServerSocket::DealCommand() {
     while (true) {
         size_t len = recv(m_client, buffer + index, BUFFER_SIZE - index, 0);
         if (len <= 0) {
+			delete[]buffer;
             return -1;
         }
         index += len;
@@ -58,9 +60,11 @@ int CServerSocket::DealCommand() {
         if (len > 0) {
             memmove(buffer, buffer + len, BUFFER_SIZE - len);
             index -= len;
+            delete[]buffer;
             return m_packet.sCmd;
         }
     }
+    delete[]buffer;
     return -1;
 }
 

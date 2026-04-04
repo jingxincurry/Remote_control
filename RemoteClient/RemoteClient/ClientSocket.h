@@ -152,7 +152,7 @@ public:
 	};
 	std::string GetErrInfo(int wsaErrCode);
 
-	bool InitSocket(const std::string& strIPAddress);
+	bool InitSocket(int nIP, int nPort);
 
 
 	int DealCommand();
@@ -165,6 +165,15 @@ public:
 
 	bool GetMouseEvent(MOUSEEV& mouse);
 
+	CPacket& GetPacket()
+	{
+		return m_packet;
+	}
+	void CloseSocket() {
+		closesocket(m_sock);
+		m_sock = INVALID_SOCKET;
+	}
+
 private:
 	std::vector<char> m_buffer;
 	SOCKET m_sock;
@@ -175,7 +184,7 @@ private:
 		
 	};
 	CClientSocket() {
-		
+
 		if (InitSockEnv() == FALSE) {
 			MessageBox(NULL, _T("无法初始化套接字环境, 请检查网络设置！"), _T("初始化错误！"), MB_OK | MB_ICONERROR);
 			exit(0);
