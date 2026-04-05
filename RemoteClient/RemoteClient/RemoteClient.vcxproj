@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -189,6 +189,7 @@
     <ClInclude Include="RemoteClient.h" />
     <ClInclude Include="RemoteClientDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="StatusDlg.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -201,6 +202,7 @@
     </ClCompile>
     <ClCompile Include="RemoteClient.cpp" />
     <ClCompile Include="RemoteClientDlg.cpp" />
+    <ClCompile Include="StatusDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RemoteClient.rc" />

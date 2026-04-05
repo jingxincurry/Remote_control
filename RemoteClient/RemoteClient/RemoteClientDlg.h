@@ -4,6 +4,9 @@
 
 #pragma once
 #include "ClientSocket.h"
+#include "StatusDlg.h"
+
+#define WM_SEND_PACKET (WM_USER + 1) //自定义消息，发送数据包到服务器
 
 // CRemoteClientDlg 对话框
 class CRemoteClientDlg : public CDialogEx
@@ -22,6 +25,9 @@ public:
 
 
 private:
+	static void threadEntryForDownFile(void* arg);
+	void threadDownFile();
+	void LoadFileCurrent();
 	void LoadFileInfo();
 	CString GetPath(HTREEITEM hTree);
 	void DeleteTreeChildrenItem(HTREEITEM hTree);
@@ -34,6 +40,7 @@ private:
 	//6 发送屏幕内容
 	//7 锁机
 	//8 解锁
+	//9 删除文件
 	//1981 测试连接
 	//返回值：是命令号，如果小于0则是错误
 	int SendCommandPacket(int nCmd, bool bAutoClose = true, BYTE* pData = NULL, size_t nLength = 0);
@@ -43,6 +50,8 @@ private:
 // 实现
 protected:
 	HICON m_hIcon;
+	CStatusDlg m_dlgStatus;
+
 
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
@@ -64,4 +73,10 @@ public:
 	// 显示文件
 	CListCtrl m_List;
 	afx_msg void OnNMRClickListFile(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDownloadFile();
+	afx_msg void OnDeleteFile();
+	afx_msg void OnOpenFile();
+
+	afx_msg LRESULT OnSendPacket(WPARAM wParam, LPARAM lParam);
 };
+

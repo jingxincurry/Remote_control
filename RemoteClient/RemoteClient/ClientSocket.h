@@ -17,10 +17,8 @@ public:
 		:sHead(0), nLength(0), sCmd(0), sSum(0)
 	{
 	};
-	CPacket(WORD nCmd, const BYTE* pData, size_t nSize) {
-		sHead = 0xFEFF;
-		nLength = nSize + 4;
-		sCmd = nCmd;
+   CPacket(WORD nCmd, const BYTE* pData, size_t nSize)
+		: sHead(0xFEFF), nLength(static_cast<DWORD>(nSize + 4)), sCmd(nCmd), sSum(0) {
 		if (nSize > 0) {
 			strData.resize(nSize);
 			memcpy((void*)strData.c_str(), pData, nSize);
@@ -29,19 +27,15 @@ public:
 			strData.clear();
 		}
 
-		sSum = 0;
 		for (size_t j = 0; j < strData.size(); j++) {
 			sSum += BYTE(strData[j]) & 0xFF;
 		}
 	}
-	CPacket(const CPacket& pack) {
-		sHead = pack.sHead;
-		nLength = pack.nLength;
-		sCmd = pack.sCmd;
-		strData = pack.strData;
-		sSum = pack.sSum;
+  CPacket(const CPacket& pack)
+		: sHead(pack.sHead), nLength(pack.nLength), sCmd(pack.sCmd), strData(pack.strData), sSum(pack.sSum), strOut(pack.strOut) {
 	}
-	CPacket(const BYTE* pData, size_t& nSize) {
+ CPacket(const BYTE* pData, size_t& nSize)
+		: sHead(0), nLength(0), sCmd(0), sSum(0) {
 		size_t i = 0;
 		//²éÕÒ°üÍ·
 		for (; i < nSize; i++) {  // i + 1 ?
