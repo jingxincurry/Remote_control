@@ -7,7 +7,7 @@
 #pragma pack(push)
 #pragma pack(1) 
 
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 2048000
 
 
 class CPacket
@@ -31,10 +31,10 @@ public:
 			sSum += BYTE(strData[j]) & 0xFF;
 		}
 	}
-  CPacket(const CPacket& pack)
+	CPacket(const CPacket& pack)
 		: sHead(pack.sHead), nLength(pack.nLength), sCmd(pack.sCmd), strData(pack.strData), sSum(pack.sSum), strOut(pack.strOut) {
 	}
- CPacket(const BYTE* pData, size_t& nSize)
+	CPacket(const BYTE* pData, size_t& nSize)
 		: sHead(0), nLength(0), sCmd(0), sSum(0) {
 		size_t i = 0;
 		//查找包头
@@ -145,6 +145,9 @@ typedef struct file_info {
 	BOOL HasNext; //是否有后续  0 没有 1 有
 	char szFileName[256];  //文件名
 }FILEINFO, * PFILEINFO;
+
+void Dump(BYTE* pData, size_t nSize);
+
 
 class CClientSocket
 {

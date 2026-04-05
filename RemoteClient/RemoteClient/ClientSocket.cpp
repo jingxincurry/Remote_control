@@ -27,6 +27,19 @@ std::string CClientSocket::GetErrInfo(int wsaErrCode) {
     return ret;
 }
 
+void Dump(BYTE* pData, size_t nSize) {
+    std::string strOut;
+    for (size_t i = 0; i < nSize; i++) {
+        char buf[8] = "";
+        if (i > 0 && (i % 16 == 0)) strOut += "\n";
+        snprintf(buf, sizeof(buf), "%02X ", pData[i] & 0xFF);
+        strOut += buf;
+    }
+    strOut += "\n";
+    OutputDebugStringA(strOut.c_str());
+
+}
+
 bool CClientSocket::InitSocket(int nIP, int nPort) {
 
     if (m_sock != INVALID_SOCKET)CloseSocket();
@@ -59,18 +72,19 @@ int CClientSocket::DealCommand() {
     //char buffer[1024];
     char* buffer = m_buffer.data();
 
-    memset(buffer, 0, BUFFER_SIZE);
-    size_t index = 0;
+    static size_t index = 0;
     while (true) {
         size_t len = recv(m_sock, buffer + index, BUFFER_SIZE - index, 0);
-        if (len <= 0) {
+        if ((len <= 0) && (index <= 0)) {
+
             return -1;
         }
+
         index += len;
         len = index;
         m_packet = CPacket::CPacket((BYTE*)buffer, len);
         if (len > 0) {
-            memmove(buffer, buffer + len, BUFFER_SIZE - len);
+            memmove(buffer, buffer + len, index - len);
             index -= len;
             return m_packet.sCmd;
         }
