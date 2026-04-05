@@ -23,10 +23,20 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
+public:
+	bool isFull() const { return m_isFull; }
+	CImage& GetImage() { return m_image; }
+private:
+	CImage m_image; //缓存屏幕图像
+	bool m_isFull; //缓存是否有数据
 
 private:
+	static void threadEntryForWatchData(void* arg);
+	void threadWatchData();
+
 	static void threadEntryForDownFile(void* arg);
 	void threadDownFile();
+
 	void LoadFileCurrent();
 	void LoadFileInfo();
 	CString GetPath(HTREEITEM hTree);
@@ -35,7 +45,6 @@ private:
 	//2 查看指定目录下的文件
 	//3 打开文件
 	//4 下载文件
-	//9 删除文件
 	//5 鼠标操作
 	//6 发送屏幕内容
 	//7 锁机
@@ -78,5 +87,7 @@ public:
 	afx_msg void OnOpenFile();
 
 	afx_msg LRESULT OnSendPacket(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnBnClickedBtnStartWatch();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 };
 

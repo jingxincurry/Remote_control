@@ -11,6 +11,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+#include "CWatchDialog.h"
 
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
@@ -104,6 +105,8 @@ BEGIN_MESSAGE_MAP(CRemoteClientDlg, CDialogEx)
 	ON_COMMAND(ID_DELETE_FILE, &CRemoteClientDlg::OnDeleteFile)
 	ON_COMMAND(ID_OPEN_FILE, &CRemoteClientDlg::OnOpenFile)
 	ON_MESSAGE(WM_SEND_PACKET, &CRemoteClientDlg::OnSendPacket)
+	ON_BN_CLICKED(IDC_BTN_START_WATCH, &CRemoteClientDlg::OnBnClickedBtnStartWatch)
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 
@@ -146,6 +149,8 @@ BOOL CRemoteClientDlg::OnInitDialog()
 
 	m_dlgStatus.Create(IDD_DLG_STATUS, this); // 创建状态对话框
 	m_dlgStatus.ShowWindow(SW_HIDE); // 显示状态对话框
+
+	m_isFull = false; //初始状态没有数据
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 
 
@@ -365,6 +370,56 @@ void CRemoteClientDlg::OnNMRClickListFile(NMHDR* pNMHDR, LRESULT* pResult)
         pPupup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, ptMouse.x, ptMouse.y, this);
 }
 
+void CRemoteClientDlg::threadEntryForWatchData(void* arg)
+{
+	CRemoteClientDlg* thiz = (CRemoteClientDlg*)arg;
+	thiz->threadWatchData();
+	_endthread();
+}
+
+void CRemoteClientDlg::threadWatchData()
+{
+	CClientSocket* pClient = NULL;
+	do {
+		pClient = CClientSocket::getInstance();
+	} while (pClient == NULL);
+	for (;;) {
+		CPacket pack(6, NULL, 0);
+		bool ret = pClient->Send(pack);
+		if (ret) {
+			int cmd = pClient->DealCommand(); //拿数据
+			if (cmd == 6) {
+				if(m_isFull == false){ //更新数据到缓存
+					BYTE* pData = (BYTE*)pClient->GetPacket().strData.c_str();
+					HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, pClient->GetPacket().strData.size()); //分配全局内存
+					if(hMem == NULL){
+						TRACE("内存不足，GlobalAlloc failed\r\n");
+						Sleep(1);
+						continue;
+					}
+					IStream* pStream = NULL; 
+					HRESULT hRet = CreateStreamOnHGlobal(hMem, TRUE, &pStream); //创建内存流对象
+					if (hRet == S_OK) { //创建内存流成功
+						ULONG nWrite = 0;
+						hRet = pStream->Write(pData, pClient->GetPacket().strData.size(), &nWrite); //将数据写入内存流
+						LARGE_INTEGER bg = { 0 };
+						pStream->Seek(bg, STREAM_SEEK_SET, NULL); //将内存流的指针移到开头
+						m_image.Load(pStream); //从内存流加载图片
+						m_isFull = true;
+					}
+					
+				
+				}
+
+			}
+			else {
+				Sleep(1);
+			}
+		}
+		
+	}
+}
+
 void CRemoteClientDlg::threadEntryForDownFile(void* arg)
 {
 	CRemoteClientDlg* thiz = (CRemoteClientDlg*)arg;
@@ -518,4 +573,21 @@ void CRemoteClientDlg::OnOpenFile()
 	if (ret < 0) {
 		AfxMessageBox("打开文件命令执行失败！！！");
 	}
+}
+
+void CRemoteClientDlg::OnBnClickedBtnStartWatch()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	_beginthread(CRemoteClientDlg::threadEntryForWatchData, 0, this);
+	
+	CWatchDialog dlg(this);
+	dlg.DoModal();
+}
+
+
+void CRemoteClientDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	CDialogEx::OnTimer(nIDEvent);
 }
