@@ -51,7 +51,20 @@ void CWatchDialog::OnTimer(UINT_PTR nIDEvent)
 	{
 		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();
 		if (pParent->isFull()) {
-
+			CRect rect;
+			m_picture.GetWindowRect(rect);
+			//pParent->GetImage().BitBlt(m_picture.GetDC()->GetSafeHdc(), 0, 0, SRCCOPY);
+			if (m_nObjWidth == -1) {
+				m_nObjWidth = pParent->GetImage().GetWidth();
+			}
+			if (m_nObjHeight == -1) {
+				m_nObjHeight = pParent->GetImage().GetHeight();
+			}
+			pParent->GetImage().StretchBlt(
+				m_picture.GetDC()->GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), SRCCOPY);
+			m_picture.InvalidateRect(NULL);
+			pParent->GetImage().Destroy();
+			pParent->SetImageStatus();
 		}
 	}
 	CDialog::OnTimer(nIDEvent);

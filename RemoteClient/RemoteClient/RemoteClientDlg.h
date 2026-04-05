@@ -25,7 +25,12 @@ public:
 
 public:
 	bool isFull() const { return m_isFull; }
+
 	CImage& GetImage() { return m_image; }
+
+	void SetImageStatus(bool isFull = false) {
+		m_isFull = isFull;
+	}
 private:
 	CImage m_image; //缓存屏幕图像
 	bool m_isFull; //缓存是否有数据

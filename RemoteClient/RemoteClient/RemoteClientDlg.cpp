@@ -575,7 +575,7 @@ void CRemoteClientDlg::OnOpenFile()
 	}
 }
 
-void CRemoteClientDlg::OnBnClickedBtnStartWatch()
+void CRemoteClientDlg::OnBnClickedBtnStartWatch() 
 {
 	// TODO: 在此添加控件通知处理程序代码
 	_beginthread(CRemoteClientDlg::threadEntryForWatchData, 0, this);

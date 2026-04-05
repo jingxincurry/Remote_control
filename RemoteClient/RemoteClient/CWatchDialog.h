@@ -18,6 +18,9 @@ public:
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_DLG_WATCH };
 #endif
+public:
+	int m_nObjWidth;
+	int m_nObjHeight;
 
 protected:
 
@@ -26,4 +29,6 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+
+	CStatic m_picture;
 };
