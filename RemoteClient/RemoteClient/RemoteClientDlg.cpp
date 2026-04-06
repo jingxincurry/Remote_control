@@ -76,6 +76,8 @@ CRemoteClientDlg::CRemoteClientDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_REMOTECLIENT_DIALOG, pParent)
 	, m_serv_address(0)
 	, m_nPort(_T(""))
+   , m_isFull(false)
+	, m_isClosed(true)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	//m_serv_address = MAKEIPADDRESS(127, 0, 0, 1);
@@ -150,7 +152,8 @@ BOOL CRemoteClientDlg::OnInitDialog()
 	m_dlgStatus.Create(IDD_DLG_STATUS, this); // 创建状态对话框
 	m_dlgStatus.ShowWindow(SW_HIDE); // 显示状态对话框
 
-	m_isFull = false; //初始状态没有数据
+    m_isFull = false; //初始状态没有数据
+	m_isClosed = true;
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 
 
@@ -379,44 +382,40 @@ void CRemoteClientDlg::threadEntryForWatchData(void* arg)
 
 void CRemoteClientDlg::threadWatchData()
 {
+	Sleep(50);
 	CClientSocket* pClient = NULL;
 	do {
 		pClient = CClientSocket::getInstance();
 	} while (pClient == NULL);
-	for (;;) {
-		CPacket pack(6, NULL, 0);
-		bool ret = pClient->Send(pack);
-		if (ret) {
-			int cmd = pClient->DealCommand(); //拿数据
-			if (cmd == 6) {
-				if(m_isFull == false){ //更新数据到缓存
-					BYTE* pData = (BYTE*)pClient->GetPacket().strData.c_str();
-					HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, pClient->GetPacket().strData.size()); //分配全局内存
-					if(hMem == NULL){
-						TRACE("内存不足，GlobalAlloc failed\r\n");
-						Sleep(1);
-						continue;
-					}
-					IStream* pStream = NULL; 
-					HRESULT hRet = CreateStreamOnHGlobal(hMem, TRUE, &pStream); //创建内存流对象
-					if (hRet == S_OK) { //创建内存流成功
-						ULONG nWrite = 0;
-						hRet = pStream->Write(pData, pClient->GetPacket().strData.size(), &nWrite); //将数据写入内存流
-						LARGE_INTEGER bg = { 0 };
-						pStream->Seek(bg, STREAM_SEEK_SET, NULL); //将内存流的指针移到开头
-						m_image.Load(pStream); //从内存流加载图片
-						m_isFull = true;
-					}
-					
-				
+	while (!m_isClosed) {//等价于while(true)	
+		if (m_isFull == false) {//更新数据到缓存
+			int ret = SendMessage(WM_SEND_PACKET, 6 << 1 | 1); //发送命令，获取数据
+			if (ret == 6) { //命令处理成功，数据已准备好		
+				BYTE* pData = (BYTE*)pClient->GetPacket().strData.c_str(); //获取数据
+				HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, 0); //分配内存
+				if (hMem == NULL) {
+					TRACE("内存不足了！");
+					Sleep(1);
+					continue;
 				}
-
+				IStream* pStream = NULL;
+				HRESULT hRet = CreateStreamOnHGlobal(hMem, TRUE, &pStream); //创建流对象
+				if (hRet == S_OK) { //写数据到流对象
+					ULONG length = 0;
+					pStream->Write(pData, pClient->GetPacket().strData.size(), &length);
+					LARGE_INTEGER bg = { 0 };
+					pStream->Seek(bg, STREAM_SEEK_SET, NULL); //将流对象的指针移到开头
+					if ((HBITMAP)m_image != NULL)
+						m_image.Destroy();
+					m_image.Load(pStream);
+					m_isFull = true;
+				}
 			}
 			else {
 				Sleep(1);
 			}
 		}
-		
+		else Sleep(1);
 	}
 }
 
@@ -578,16 +577,18 @@ void CRemoteClientDlg::OnOpenFile()
 void CRemoteClientDlg::OnBnClickedBtnStartWatch() 
 {
 	// TODO: 在此添加控件通知处理程序代码
+   m_isClosed = false;
 	_beginthread(CRemoteClientDlg::threadEntryForWatchData, 0, this);
 	
 	CWatchDialog dlg(this);
 	dlg.DoModal();
+   m_isClosed = true;
 }
 
 
 void CRemoteClientDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-
+	
 	CDialogEx::OnTimer(nIDEvent);
 }
