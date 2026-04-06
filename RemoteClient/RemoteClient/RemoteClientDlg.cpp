@@ -146,6 +146,7 @@ BOOL CRemoteClientDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 	UpdateData();
 	m_serv_address = MAKEIPADDRESS(127, 0, 0, 1);
+	//m_serv_address = MAKEIPADDRESS(192, 168, 0, 101); //bing
 	m_nPort = _T("9527");
 	UpdateData(FALSE);
 
@@ -578,11 +579,13 @@ void CRemoteClientDlg::OnBnClickedBtnStartWatch()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_isClosed = false;
-	_beginthread(CRemoteClientDlg::threadEntryForWatchData, 0, this);
+	HANDLE hThread = (HANDLE)_beginthread(CRemoteClientDlg::threadEntryForWatchData, 0, this);
 	
 	CWatchDialog dlg(this);
 	dlg.DoModal();
 	m_isClosed = true;
+	WaitForSingleObject(hThread, 500);
+	
 }
 
 

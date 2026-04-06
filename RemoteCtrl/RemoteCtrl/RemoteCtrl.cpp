@@ -168,16 +168,16 @@ int MouseEvent() {
         switch (mouse.nAction)
         {
         case 0: //单击
-            nFlags = 0x10;
+            nFlags |= 0x10;
             break;
         case 1: //双击
-            nFlags = 0x20;
+            nFlags |= 0x20;
             break;
         case 2: //按下
-            nFlags = 0x40;
+            nFlags |= 0x40;
             break;
         case 3: //放开
-            nFlags = 0x80;
+            nFlags |= 0x80;
             break;
         default: //不作处理 
             break;
