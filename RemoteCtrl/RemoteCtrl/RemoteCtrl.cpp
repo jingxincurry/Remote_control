@@ -453,7 +453,6 @@ int main()
                 exit(0);
             }
             while (CServerSocket::getInstance() != NULL) {
-
                 if (pserver->AcceptClient() == false) {
                     if (count >= 3) {
                         MessageBox(NULL, _T("多次无法正常接入用户，结束程序！"), _T("接入失败！"), MB_OK | MB_ICONERROR);

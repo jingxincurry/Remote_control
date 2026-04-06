@@ -45,13 +45,30 @@ END_MESSAGE_MAP()
 
 CPoint CWatchDialog::UserPoint2RemoteScreenPoint(CPoint& point, bool isScreen)
 {//800 450
-	CRect clientRect;
-	if (isScreen)ScreenToClient(&point);//全局坐标到客户区域坐标
-	TRACE("x=%d y=%d\r\n", point.x, point.y);
-	//本地坐标，到远程坐标
-	m_picture.GetWindowRect(clientRect);
-	TRACE("x=%d y=%d\r\n", clientRect.Width(), clientRect.Height());
-	return CPoint(point.x * m_nObjWidth / clientRect.Width(), point.y * m_nObjHeight / clientRect.Height());
+   if (isScreen) ScreenToClient(&point);//全局坐标到客户区域坐标
+
+	CRect pictureRect;
+	m_picture.GetWindowRect(&pictureRect);
+	ScreenToClient(&pictureRect);
+
+	if (pictureRect.Width() <= 0 || pictureRect.Height() <= 0 || m_nObjWidth <= 0 || m_nObjHeight <= 0) {
+		return CPoint(0, 0);
+	}
+
+	// 转为图片控件内部坐标
+	int x = point.x - pictureRect.left;
+	int y = point.y - pictureRect.top;
+
+	// 限制在图片区域内，避免越界
+	x = max(0, min(x, pictureRect.Width() - 1));
+	y = max(0, min(y, pictureRect.Height() - 1));
+
+	TRACE("local x=%d y=%d\r\n", x, y);
+	TRACE("pic w=%d h=%d\r\n", pictureRect.Width(), pictureRect.Height());
+
+	return CPoint(
+		MulDiv(x, m_nObjWidth, pictureRect.Width()),
+		MulDiv(y, m_nObjHeight, pictureRect.Height()));
 }
 
 // CWatchDialog 消息处理程序
