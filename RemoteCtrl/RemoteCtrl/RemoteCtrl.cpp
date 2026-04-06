@@ -297,14 +297,25 @@ unsigned __stdcall threadLockDlg(void* arg)
     TRACE("right = %d bottom = %d\r\n", rect.right, rect.bottom);
     //printf("screen width:%d\r\n", rect.right);
     dlg.MoveWindow(rect); //调整对话框大小和位置，使其覆盖整个屏幕
+    CWnd* pText = dlg.GetDlgItem(IDC_STATIC);
+    if (pText) {
+        CRect rtText;
+        pText->GetWindowRect(rtText);
+        int nWidth = rtText.Width();//w0
+        int x = (rect.right - nWidth) / 2;
+        int nHeight = rtText.Height();
+        int y = (rect.bottom - nHeight) / 2;
+        pText->MoveWindow(x, y, rtText.Width(), rtText.Height());
+    }
+
     //窗口置顶
     dlg.SetWindowPos(&CWnd::wndTopMost, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE); //最顶层显示
     //限制鼠标功能
     ShowCursor(FALSE); //隐藏鼠标
     //隐藏任务栏
     ::ShowWindow(::FindWindow(_T("Shell_TrayWnd"), NULL), SW_HIDE);
-
-    //dlg.GetWindowRect(rect);
+	//限制鼠标在对话框内移动
+    dlg.GetWindowRect(rect);
     rect.left = 0;
     rect.top = 0;
     rect.right = 1;
