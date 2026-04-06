@@ -118,6 +118,8 @@ public:
 #pragma pack(pop)
 
 typedef struct MouseEvent {
+	//nButton：0表示左键，1表示右键，2表示中键，4没有按键
+	//nAction: 0表示单击，1表示双击，2表示按下，3表示放开，4不作处理
 	MouseEvent() {
 		nAction = 0;
 		nButton = -1;

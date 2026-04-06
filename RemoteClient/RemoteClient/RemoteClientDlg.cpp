@@ -577,12 +577,12 @@ void CRemoteClientDlg::OnOpenFile()
 void CRemoteClientDlg::OnBnClickedBtnStartWatch() 
 {
 	// TODO: 在此添加控件通知处理程序代码
-   m_isClosed = false;
+	m_isClosed = false;
 	_beginthread(CRemoteClientDlg::threadEntryForWatchData, 0, this);
 	
 	CWatchDialog dlg(this);
 	dlg.DoModal();
-   m_isClosed = true;
+	m_isClosed = true;
 }
 
 
