@@ -28,7 +28,7 @@ void Dump(BYTE* pData, size_t nSize) {
         strOut += buf;
     }
     strOut += "\n";
-    OutputDebugStringA(strOut.c_str());
+    OutputDebugStringA(strOut.c_str()); 
 
 }
 
