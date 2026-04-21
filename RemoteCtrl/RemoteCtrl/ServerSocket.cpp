@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ServerSocket.h"
+#include "MirrorTool.h"
 
 
 //CServerSocket server;
@@ -40,7 +41,6 @@ bool CServerSocket::AcceptClient() {
     
 }
 
-
 #define BUFFER_SIZE 4096
 int CServerSocket::DealCommand() {
     if (m_client == -1) return -1;
@@ -75,7 +75,7 @@ bool CServerSocket::Send(const char* pData, int nSize) {
 
 bool CServerSocket::Send(CPacket& pack) {
     if (m_client == -1) return false;
-	Dump((BYTE*)pack.Data(), pack.Size());
+  CMirrorTool::Dump((BYTE*)pack.Data(), pack.Size());
     return send(m_client, pack.Data(), pack.Size(), 0) > 0;
 }
 

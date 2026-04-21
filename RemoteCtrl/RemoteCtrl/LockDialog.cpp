@@ -1,5 +1,4 @@
 ﻿// LockDialog.cpp: 实现文件
-//
 
 #include "pch.h"
 #include "RemoteCtrl.h"
@@ -8,7 +7,6 @@
 
 
 // CLockDialog 对话框
-
 IMPLEMENT_DYNAMIC(CLockDialog, CDialog)
 
 CLockDialog::CLockDialog(CWnd* pParent /*=nullptr*/)
