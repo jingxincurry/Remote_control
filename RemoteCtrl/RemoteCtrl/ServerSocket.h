@@ -35,14 +35,6 @@ protected:
 
 	bool Send(CPacket& pack);
 
-	bool GetFilePath(std::string& strPath);
-
-	bool GetMouseEvent(MOUSEEV& mouse);
-	
-	CPacket& GetPacket()
-	{
-		return m_packet;
-	}
 
 	void CloseClient() {
 		if (m_client != INVALID_SOCKET) {

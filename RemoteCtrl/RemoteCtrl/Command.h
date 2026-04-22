@@ -178,8 +178,11 @@ protected:
             } while (nSize >= 1024); //1024字节为一个包,读
             fclose(fp);
         }
+        else {
+            lstPacket.push_back(CPacket(4, (BYTE*)&data, 8));
+        }
 
-        lstPacket.push_back(CPacket(4, (BYTE*)&data, 8));
+        
 
         return 0;
     }
@@ -187,43 +190,56 @@ protected:
     int MouseEvent(std::list<CPacket>& lstPacket, CPacket& inPacket) {
         MOUSEEV mouse;
 		memcpy(&mouse, inPacket.strData.c_str(), sizeof(MOUSEEV));
-        
-        DWORD nFlags = 0;
+
+        DWORD nButtonFlag = 0;
         switch (mouse.nButton)
         {
         case 0: //左键
-            nFlags = 1;
+            nButtonFlag = 1;
             break;
         case 1: //右键
-            nFlags = 2;
+            nButtonFlag = 2;
             break;
         case 2: //中键
-            nFlags = 4;
+            nButtonFlag = 4;
             break;
         case 4: //没有按键
-            nFlags = 8;
+            nButtonFlag = 8;
+            break;
+        default:
+            nButtonFlag = 8;
             break;
         }
-        if (nFlags != 8) {
+        if (nButtonFlag != 8) {
             SetCursorPos(mouse.ptXY.x, mouse.ptXY.y);
         }
+        else {
+            SetCursorPos(mouse.ptXY.x, mouse.ptXY.y);
+        }
+
+        DWORD nActionFlag = 0;
         switch (mouse.nAction)
         {
         case 0: //单击
-            nFlags = 0x10;
+            nActionFlag = 0x10;
             break;
         case 1: //双击
-            nFlags = 0x20;
+            nActionFlag = 0x20;
             break;
         case 2: //按下
-            nFlags = 0x40;
+            nActionFlag = 0x40;
             break;
         case 3: //放开
-            nFlags = 0x80;
+            nActionFlag = 0x80;
+            break;
+        case 4: //移动
+            nActionFlag = 0x100;
             break;
         default: //不作处理 
             break;
         }
+
+        DWORD nFlags = nButtonFlag | nActionFlag;
         switch (nFlags) {
         case 0x21: //左键双击
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, GetMessageExtraInfo());
@@ -267,7 +283,7 @@ protected:
         case 0x84: //中键放开
             mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, GetMessageExtraInfo());
             break;
-        case 0x08: //单词鼠标移动
+        case 0x108: //鼠标移动
             mouse_event(MOUSEEVENTF_MOVE, mouse.ptXY.x, mouse.ptXY.y, 0, GetMessageExtraInfo());
             break;
         }
