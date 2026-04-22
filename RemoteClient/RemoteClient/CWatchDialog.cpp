@@ -39,7 +39,6 @@ BEGIN_MESSAGE_MAP(CWatchDialog, CDialog)
 	ON_WM_RBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_STN_CLICKED(IDC_WATCH, &CWatchDialog::OnStnClickedWatch)
-   ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 CPoint CWatchDialog::UserPoint2RemoteScreenPoint(CPoint& point, bool isScreen)
@@ -61,7 +60,6 @@ BOOL CWatchDialog::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化
 	SetTimer(0, 45, NULL);
-  SetCapture();
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
 }
@@ -95,14 +93,6 @@ void CWatchDialog::OnTimer(UINT_PTR nIDEvent)
 			pParent->SetImageStatus();
 		}
 	}
-
-void CWatchDialog::OnDestroy()
-{
-	if (GetCapture() == this) {
-		ReleaseCapture();
-	}
-	CDialog::OnDestroy();
-}
 	CDialog::OnTimer(nIDEvent);
 }
 
@@ -219,8 +209,8 @@ void CWatchDialog::OnMouseMove(UINT nFlags, CPoint point)
 		//封装
 		MOUSEEV event;
 		event.ptXY = remote;
-        event.nButton = 4;//没有按键
-		event.nAction = 4;//移动
+		event.nButton = 8;//没有按键
+		event.nAction = 0;//移动
 		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();//TODO:存在一个设计隐患 网络通信和对话框有耦合
 		pParent->SendMessage(WM_SEND_PACKET, 5 << 1 | 1, (WPARAM)&event);
 	}
