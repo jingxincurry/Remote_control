@@ -11,14 +11,10 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-
-
 // 唯一的应用程序对象
 
 CWinApp theApp;
 using namespace std;
-
-
 int main()
 {
     int nRetCode = 0;
@@ -36,34 +32,20 @@ int main()
         }
         else
         {
-            // TODO: 在此处为应用程序的行为编写代码。
+            
 			CCommand cmd;
             CServerSocket* pserver = CServerSocket::getInstance(); //创建单例
-            int count = 0;
-            if (pserver->InitSocket() == false) {
+            int ret = pserver->Run(CCommand::RunCommand, &cmd, 9527);
+            switch (ret)
+            {
+            case -1:
                 MessageBox(NULL, _T("网络初始化异常，未能成功初始化网络，请检查网络状态"), _T("网络初始化失败！"), MB_OK | MB_ICONERROR);
+				exit(0);
+                break;
+            case -2:
+				MessageBox(NULL, _T("多次无法正常接入用户，结束程序！"), _T("接入失败！"), MB_OK | MB_ICONERROR);
                 exit(0);
-            }
-            while (CServerSocket::getInstance() != NULL) {
-
-                if (pserver->AcceptClient() == false) {
-                    if (count >= 3) {
-                        MessageBox(NULL, _T("多次无法正常接入用户，结束程序！"), _T("接入失败！"), MB_OK | MB_ICONERROR);
-                    }
-                    MessageBox(NULL, _T("无法正常接入用户，自动重试"), _T("接入用户失败！"), MB_OK | MB_ICONERROR);
-                    count++;
-                }
-                TRACE("AcceptClient return true\r\n");
-                int ret = pserver->DealCommand();
-                TRACE("DealCommand ret %d\r\n", ret);
-                if (ret > 0) {
-                    ret = cmd.ExcuteCommand(ret);
-                    if (ret != 0) {
-                        TRACE("执行命令失败：%d ret=%d\r\n", pserver->GetPacket().sCmd, ret);
-                    }
-                    pserver->CloseClient();
-                    TRACE("Command has done!\r\n");
-                }
+				break;
             }
         }
     }

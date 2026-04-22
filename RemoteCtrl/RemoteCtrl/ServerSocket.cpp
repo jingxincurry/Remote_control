@@ -10,7 +10,7 @@ CServerSocket::CHelper CServerSocket::m_helper;
 
 CServerSocket* pserver = CServerSocket::getInstance();
 
-bool CServerSocket::InitSocket() {
+bool CServerSocket::InitSocket(short port) {
     
     if (m_sock == -1) return false;
      //2.绑定地址
@@ -18,7 +18,7 @@ bool CServerSocket::InitSocket() {
     memset(&serv_adr, 0, sizeof(serv_adr));
 
     serv_adr.sin_family = AF_INET;
-    serv_adr.sin_port = htons(9527);
+    serv_adr.sin_port = htons(port);
     serv_adr.sin_addr.s_addr = htonl(INADDR_ANY);
     if (bind(m_sock, (SOCKADDR*)&serv_adr, sizeof(serv_adr)) == -1)
     {
@@ -28,7 +28,37 @@ bool CServerSocket::InitSocket() {
     if (listen(m_sock, 1) == -1) {
         return false;
     }
+	
     return true;
+}
+int CServerSocket::Run(SOCK_CALLBACK callback, void* arg, short port = 9527) {
+	// socket、bind、listen、accept、recv、send、close
+	bool ret = InitSocket(port);
+    if(ret == false) return -1;
+	std::list<CPacket> lstPacket;
+    m_callback = callback;
+    m_arg = arg;
+	int count = 0;
+    while (true) {
+        if (AcceptClient() == false) {
+            if(count >= 3) {
+                //MessageBox(NULL, _T("多次无法正常接入用户，结束程序！"), _T("接入失败！"), MB_OK | MB_ICONERROR);
+                return -2;
+			}
+			count++;
+        }
+		int ret = DealCommand();
+        if (ret > 0) {
+			m_callback(m_arg, ret, lstPacket, m_packet);
+            while(lstPacket.size() > 0) {
+                Send(lstPacket.front());
+                lstPacket.pop_front();
+			}
+			
+        }
+        CloseClient();
+    }
+    
 }
 
 bool CServerSocket::AcceptClient() {

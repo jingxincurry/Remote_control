@@ -157,6 +157,7 @@
     <ClInclude Include="Command.h" />
     <ClInclude Include="LockDialog.h" />
     <ClInclude Include="MirrorTool.h" />
+    <ClInclude Include="Packet.h" />
     <ClInclude Include="ServerSocket.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
