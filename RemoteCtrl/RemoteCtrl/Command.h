@@ -173,13 +173,15 @@ protected:
             do {
                 nSize = fread(buffer, 1, sizeof(buffer), fp);
                 if (nSize > 0) {
-                    lstPacket.push_back(CPacket(4, (BYTE*)&data, 8));
+                    lstPacket.push_back(CPacket(4, (BYTE*)&buffer, nSize));
                 }
             } while (nSize >= 1024); //1024字节为一个包,读
             fclose(fp);
         }
+        else {
+            lstPacket.push_back(CPacket(4, (BYTE*)&data, 8));
+        }
 
-        lstPacket.push_back(CPacket(4, (BYTE*)&data, 8));
 
         return 0;
     }
