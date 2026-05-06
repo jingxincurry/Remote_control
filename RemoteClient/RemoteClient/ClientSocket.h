@@ -4,6 +4,9 @@
 #include "framework.h"
 #include <string>
 #include <vector>
+#include <map>
+#include <mutex>
+#include <list>
 #pragma pack(push)
 #pragma pack(1) 
 
@@ -150,6 +153,34 @@ typedef struct file_info {
 
 void Dump(BYTE* pData, size_t nSize);
 
+enum {
+	CSM_AUTOCLOSE = 1,//CSM = Client Socket Mode 自动关闭模式
+};
+
+typedef struct PacketData {
+	std::string strData;
+	UINT nMode;
+	WPARAM wParam;
+	PacketData(const char* pData, size_t nLen, UINT mode, WPARAM nParam = 0) {
+		strData.resize(nLen);
+		memcpy((char*)strData.c_str(), pData, nLen);
+		nMode = mode;
+		wParam = nParam;
+	}
+	PacketData(const PacketData& data) {
+		strData = data.strData;
+		nMode = data.nMode;
+		wParam = data.wParam;
+	}
+	PacketData& operator=(const PacketData& data) {
+		if (this != &data) {
+			strData = data.strData;
+			nMode = data.nMode;
+			wParam = data.wParam;
+		}
+		return *this;
+	}
+}PACKET_DATA;
 
 class CClientSocket
 {
@@ -172,6 +203,9 @@ public:
 
 	bool Send(CPacket& pack);
 
+	int SendPacket(HWND hWnd, const CPacket& pack, bool isAutoClosed = true, WPARAM wParam = 0);
+
+
 	bool GetFilePath(std::string& strPath);
 
 	bool GetMouseEvent(MOUSEEV& mouse);
@@ -185,16 +219,38 @@ public:
 		m_sock = INVALID_SOCKET;
 	}
 
+	void UpdateAddress(int nIP, int nPort) {
+		if ((m_nIP != nIP) || (m_nPort != nPort)) {
+			m_nIP = nIP;
+			m_nPort = nPort;
+		}
+	}
+
 private:
+	HANDLE m_eventInvoke;//启动事件
+	UINT m_nThreadID;
+	typedef void(CClientSocket::* MSGFUNC)(UINT nMsg, WPARAM wParam, LPARAM lParam);
+	std::map<UINT, MSGFUNC> m_mapFunc;
+	HANDLE m_hThread;
+	bool m_bAutoClose;
+	std::mutex m_lock;
+	std::list<CPacket> m_lstSend;
+	std::map<HANDLE, std::list<CPacket>&> m_mapAck;
+	std::map<HANDLE, bool> m_mapAutoClosed;
+
+	int m_nIP;
+	int m_nPort;
 	std::vector<char> m_buffer;
 	SOCKET m_sock;
 	CPacket m_packet;
 	CClientSocket& operator=(const CClientSocket& ss) {};
 	CClientSocket(const CClientSocket& ss) {
 		m_sock = ss.m_sock;
-		
+		m_nIP = ss.m_nIP;
+		m_nPort = ss.m_nPort;
 	};
 	CClientSocket() {
+		m_sock = INVALID_SOCKET;
 		if (InitSockEnv() == FALSE) {
 			MessageBox(NULL, _T("无法初始化套接字环境, 请检查网络设置！"), _T("初始化错误！"), MB_OK | MB_ICONERROR);
 			exit(0);
@@ -229,7 +285,6 @@ private:
 	{
 	public:
 		CHelper() {
-			CClientSocket::getInstance();
 		}
 		~CHelper() {
 			CClientSocket::releaseInstance();

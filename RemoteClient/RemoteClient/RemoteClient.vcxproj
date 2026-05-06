@@ -29,7 +29,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>Static</UseOfMfc>
   </PropertyGroup>
@@ -183,9 +183,11 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ClientController.h" />
     <ClInclude Include="ClientSocket.h" />
     <ClInclude Include="CWatchDialog.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="MirrorTool.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="RemoteClient.h" />
     <ClInclude Include="RemoteClientDlg.h" />
@@ -194,6 +196,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ClientController.cpp" />
     <ClCompile Include="ClientSocket.cpp" />
     <ClCompile Include="CWatchDialog.cpp" />
     <ClCompile Include="pch.cpp">

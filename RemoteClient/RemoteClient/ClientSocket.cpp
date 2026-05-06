@@ -2,15 +2,14 @@
 #include "ClientSocket.h"
 #include <Ws2tcpip.h>
 #include <vector>
+#include "ClientController.h"
 
 
 //CServerSocket server;
 
 CClientSocket* CClientSocket::m_instance = NULL;
 CClientSocket::CHelper CClientSocket::m_helper;
-
 CClientSocket* pclient = CClientSocket::getInstance();
-
 
 std::string CClientSocket::GetErrInfo(int wsaErrCode) {
 	std::string ret;
@@ -44,7 +43,7 @@ bool CClientSocket::InitSocket(int nIP, int nPort) {
 
     if (m_sock != INVALID_SOCKET)CloseSocket();
     m_sock = socket(PF_INET, SOCK_STREAM, 0);
-    if (m_sock == -1)return false;
+    if (m_sock == INVALID_SOCKET)return false;
     sockaddr_in serv_adr;
     memset(&serv_adr, 0, sizeof(serv_adr));
     serv_adr.sin_family = AF_INET;
@@ -68,17 +67,17 @@ bool CClientSocket::InitSocket(int nIP, int nPort) {
 
 
 int CClientSocket::DealCommand() {
-    if (m_sock == -1) return -1;
+    if (m_sock == INVALID_SOCKET) return -1;
     //char buffer[1024];
     char* buffer = m_buffer.data();
 
     static size_t index = 0;
     while (true) {
         size_t len = recv(m_sock, buffer + index, BUFFER_SIZE - index, 0);
-        if ((len <= 0) && (index <= 0)) {
+        if (((int)len <= 0) && ((int)index <= 0)) {
             return -1;
         }
-
+        TRACE("recv len = %d(0x%08X) index = %d(0x%08X)\r\n", len, len, index, index);
         index += len;
         len = index;
         m_packet = CPacket::CPacket((BYTE*)buffer, len);
@@ -92,13 +91,34 @@ int CClientSocket::DealCommand() {
 }
 
 bool CClientSocket::Send(const char* pData, int nSize) {
-    if (m_sock == -1) return false;
+    if (m_sock == INVALID_SOCKET) return false;
     return send(m_sock, pData, nSize, 0) > 0;
 }
 
 bool CClientSocket::Send(CPacket& pack) {
-    if (m_sock == -1) return false;
-    return send(m_sock, pack.Data(), pack.Size(), 0) > 0;
+    TRACE("m_sock = %d\r\n", m_sock);
+    if (m_sock == INVALID_SOCKET)return false;
+    std::string strOut;
+    strOut.assign(pack.Data(), pack.Size());
+    return send(m_sock, strOut.c_str(), strOut.size(), 0) > 0;
+}
+
+int CClientSocket::SendPacket(HWND hWnd, const CPacket& pack, bool isAutoClosed, WPARAM wParam)
+{
+    if (m_sock == INVALID_SOCKET) {
+        bool ret = InitSocket(m_nIP, m_nPort);
+        if (!ret) {
+            return -1;
+        }
+    }
+    bool retSend = Send((CPacket&)pack);
+    if (!retSend) return -1;
+
+    int cmd = DealCommand();
+    if (isAutoClosed) {
+        CloseSocket();
+    }
+    return cmd;
 }
 
 bool CClientSocket::GetFilePath(std::string& strPath) {

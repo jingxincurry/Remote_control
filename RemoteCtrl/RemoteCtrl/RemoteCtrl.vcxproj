@@ -30,7 +30,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
@@ -156,7 +156,6 @@
   <ItemGroup>
     <ClInclude Include="Command.h" />
     <ClInclude Include="LockDialog.h" />
-    <ClInclude Include="MirrorTool.h" />
     <ClInclude Include="Packet.h" />
     <ClInclude Include="ServerSocket.h" />
     <ClInclude Include="framework.h" />

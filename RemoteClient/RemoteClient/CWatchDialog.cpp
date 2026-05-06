@@ -6,7 +6,7 @@
 #include "afxdialogex.h"
 #include "CWatchDialog.h"
 #include "RemoteClientDlg.h"
-
+#include "ClientController.h"
 // CWatchDialog 对话框
 
 IMPLEMENT_DYNAMIC(CWatchDialog, CDialog)
@@ -14,6 +14,7 @@ IMPLEMENT_DYNAMIC(CWatchDialog, CDialog)
 CWatchDialog::CWatchDialog(CWnd* pParent /*=nullptr*/)
 	: CDialog(IDD_DLG_WATCH, pParent)
 {
+	m_isFull = false;
 	m_nObjWidth = -1;
 	m_nObjHeight = -1;
 }
@@ -59,6 +60,7 @@ BOOL CWatchDialog::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// TODO:  在此添加额外的初始化
+	m_isFull = false; //初始状态没有数据
 	SetTimer(0, 45, NULL);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 异常: OCX 属性页应返回 FALSE
@@ -69,28 +71,20 @@ BOOL CWatchDialog::OnInitDialog()
 void CWatchDialog::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	if(nIDEvent == 0)
-	{
-		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();
-        if (pParent != nullptr && ::IsWindow(m_picture.GetSafeHwnd()) && pParent->isFull()) {
+	if (nIDEvent == 0) {
+		CClientController* pParent = CClientController::getInstance();
+		if (m_isFull) {
 			CRect rect;
 			m_picture.GetWindowRect(rect);
-			//pParent->GetImage().BitBlt(m_picture.GetDC()->GetSafeHdc(), 0, 0, SRCCOPY);
-			if (m_nObjWidth == -1) {
-				m_nObjWidth = pParent->GetImage().GetWidth();
-			}
-			if (m_nObjHeight == -1) {
-				m_nObjHeight = pParent->GetImage().GetHeight();
-			}
-         CDC* pDC = m_picture.GetDC();
-			if (pDC != nullptr) {
-				pParent->GetImage().StretchBlt(
-					pDC->GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), SRCCOPY);
-				m_picture.ReleaseDC(pDC);
-			}
+			m_nObjWidth = m_image.GetWidth();
+			m_nObjHeight = m_image.GetHeight();
+
+			m_image.StretchBlt(
+				m_picture.GetDC()->GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), SRCCOPY);
 			m_picture.InvalidateRect(NULL);
-			pParent->GetImage().Destroy();
-			pParent->SetImageStatus();
+			TRACE("更新图片完成%d %d %08X\r\n", m_nObjWidth, m_nObjHeight, (HBITMAP)m_image);
+			m_image.Destroy();
+			m_isFull = false;
 		}
 	}
 	CDialog::OnTimer(nIDEvent);
@@ -107,9 +101,8 @@ void CWatchDialog::OnLButtonDblClk(UINT nFlags, CPoint point)
 		MOUSEEV event;
 		event.ptXY = remote;
 		event.nButton = 0;//左键
-		event.nAction = 1;//双击
-		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();
-		pParent->SendMessage(WM_SEND_PACKET, 5 << 1 | 1, (WPARAM)&event);
+		event.nAction = 2;//双击
+		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnLButtonDblClk(nFlags, point);
 }
@@ -126,8 +119,7 @@ void CWatchDialog::OnLButtonDown(UINT nFlags, CPoint point)
 		event.ptXY = remote;
 		event.nButton = 0;//左键
 		event.nAction = 2;//按下
-		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();
-		pParent->SendMessage(WM_SEND_PACKET, 5 << 1 | 1, (WPARAM)&event);
+		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnLButtonDown(nFlags, point);
 }
@@ -143,8 +135,7 @@ void CWatchDialog::OnLButtonUp(UINT nFlags, CPoint point)
 		event.ptXY = remote;
 		event.nButton = 0;//左键
 		event.nAction = 3;//弹起
-		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();
-		pParent->SendMessage(WM_SEND_PACKET, 5 << 1 | 1, (WPARAM)&event);
+		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnLButtonUp(nFlags, point);
 }
@@ -160,8 +151,7 @@ void CWatchDialog::OnRButtonDblClk(UINT nFlags, CPoint point)
 		event.ptXY = remote;
 		event.nButton = 1;//右键
 		event.nAction = 1;//双击
-		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();
-		pParent->SendMessage(WM_SEND_PACKET, 5 << 1 | 1, (WPARAM)&event);
+		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnRButtonDblClk(nFlags, point);
 }
@@ -177,8 +167,7 @@ void CWatchDialog::OnRButtonDown(UINT nFlags, CPoint point)
 		event.ptXY = remote;
 		event.nButton = 1;//右键
 		event.nAction = 2;//按下 //TODO:服务端要做对应的修改
-		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();
-		pParent->SendMessage(WM_SEND_PACKET, 5 << 1 | 1, (WPARAM)&event);
+		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnRButtonDown(nFlags, point);
 }
@@ -194,8 +183,7 @@ void CWatchDialog::OnRButtonUp(UINT nFlags, CPoint point)
 		event.ptXY = remote;
 		event.nButton = 1;//右键
 		event.nAction = 3;//弹起
-		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();
-		pParent->SendMessage(WM_SEND_PACKET, 5 << 1 | 1, (WPARAM)&event);
+		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnRButtonUp(nFlags, point);
 }
@@ -211,8 +199,7 @@ void CWatchDialog::OnMouseMove(UINT nFlags, CPoint point)
 		event.ptXY = remote;
 		event.nButton = 8;//没有按键
 		event.nAction = 0;//移动
-		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();//TODO:存在一个设计隐患 网络通信和对话框有耦合
-		pParent->SendMessage(WM_SEND_PACKET, 5 << 1 | 1, (WPARAM)&event);
+		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnMouseMove(nFlags, point);
 }
@@ -230,7 +217,6 @@ void CWatchDialog::OnStnClickedWatch()
 		event.ptXY = remote;
 		event.nButton = 0;//左键
 		event.nAction = 0;//单击
-		CRemoteClientDlg* pParent = (CRemoteClientDlg*)GetParent();
-		pParent->SendMessage(WM_SEND_PACKET, 5 << 1 | 1, (WPARAM)&event);
+		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 }

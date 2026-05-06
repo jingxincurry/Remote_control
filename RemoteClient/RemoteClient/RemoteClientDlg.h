@@ -24,40 +24,24 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
 public:
-	bool isFull() const { return m_isFull; }
+	
 
-	CImage& GetImage() { return m_image; }
-
-	void SetImageStatus(bool isFull = false) {
-		m_isFull = isFull;
-	}
+	
 private:
 	CImage m_image; //缓存屏幕图像
-	bool m_isFull; //缓存是否有数据
+	
 	bool m_isClosed;//监视是否关闭
 private:
-	static void threadEntryForWatchData(void* arg);
-	void threadWatchData();
+	
 
-	static void threadEntryForDownFile(void* arg);
-	void threadDownFile();
+	/*static void threadEntryForDownFile(void* arg);
+	void threadDownFile();*/
 
 	void LoadFileCurrent();
 	void LoadFileInfo();
 	CString GetPath(HTREEITEM hTree);
 	void DeleteTreeChildrenItem(HTREEITEM hTree);
-	//1 查看磁盘分区
-	//2 查看指定目录下的文件
-	//3 打开文件
-	//4 下载文件
-	//5 鼠标操作
-	//6 发送屏幕内容
-	//7 锁机
-	//8 解锁
-	//9 删除文件
-	//1981 测试连接
-	//返回值：是命令号，如果小于0则是错误
-	int SendCommandPacket(int nCmd, bool bAutoClose = true, BYTE* pData = NULL, size_t nLength = 0);
+	
 
 
 
@@ -77,7 +61,7 @@ public:
 	afx_msg void OnBnClickedBtnTest();
 
 
-	DWORD m_serv_address;
+	DWORD m_server_address;
 	CString m_nPort;
 	afx_msg void OnIpnFieldchangedIpaddressServ(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBnClickedBtnFileinfo();
@@ -91,8 +75,9 @@ public:
 	afx_msg void OnDeleteFile();
 	afx_msg void OnOpenFile();
 
-	afx_msg LRESULT OnSendPacket(WPARAM wParam, LPARAM lParam);
+	
 	afx_msg void OnBnClickedBtnStartWatch();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnEnChangeEditPort();
 };
 

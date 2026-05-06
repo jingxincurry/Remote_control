@@ -36,9 +36,6 @@
     <ClInclude Include="LockDialog.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MirrorTool.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Command.h">
       <Filter>头文件</Filter>
     </ClInclude>
