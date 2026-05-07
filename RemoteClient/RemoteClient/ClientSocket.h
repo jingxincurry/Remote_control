@@ -7,10 +7,13 @@
 #include <map>
 #include <mutex>
 #include <list>
+#define WM_SEND_PACK (WM_USER+1) //发送包数据
+#define WM_SEND_PACK_ACK (WM_USER+2) //发送包数据应答
+
 #pragma pack(push)
 #pragma pack(1) 
 
-#define BUFFER_SIZE 2048000
+#define BUFFER_SIZE 4096000
 
 
 class CPacket
@@ -18,8 +21,7 @@ class CPacket
 public:
 	CPacket()
 		:sHead(0), nLength(0), sCmd(0), sSum(0)
-	{
-	};
+	{};
    CPacket(WORD nCmd, const BYTE* pData, size_t nSize)
 		: sHead(0xFEFF), nLength(static_cast<DWORD>(nSize + 4)), sCmd(nCmd), sSum(0) {
 		if (nSize > 0) {
@@ -98,7 +100,7 @@ public:
 	int Size() {
 		return nLength + 2 + 4; //head length data sum
 	}
-	const char* Data() {
+	const char* Data(std::string& strOut) const {
 		strOut.resize(nLength + 2 + 4);
 		BYTE* pData = (BYTE*)strOut.c_str();
 		*(WORD*)pData = sHead; pData += 2;
@@ -117,6 +119,8 @@ public:
 	std::string strData; //包数据    不确定
 	WORD sSum; //和校验            2
 	std::string strOut;
+
+	HANDLE hEvent; //等待应答的事件
 };
 #pragma pack(pop)
 
@@ -182,6 +186,8 @@ typedef struct PacketData {
 	}
 }PACKET_DATA;
 
+std::string GetErrInfo(int wsaErrCode);
+void Dump(BYTE* pData, size_t nSize);
 class CClientSocket
 {
 public:
@@ -192,16 +198,13 @@ public:
 		return m_instance;
 
 	};
-	std::string GetErrInfo(int wsaErrCode);
+	
 
-	bool InitSocket(int nIP, int nPort);
-
+	bool InitSocket();
 
 	int DealCommand();
 
-	bool Send(const char* pData, int nSize);
-
-	bool Send(CPacket& pack);
+	
 
 	int SendPacket(HWND hWnd, const CPacket& pack, bool isAutoClosed = true, WPARAM wParam = 0);
 
@@ -215,8 +218,10 @@ public:
 		return m_packet;
 	}
 	void CloseSocket() {
-		closesocket(m_sock);
-		m_sock = INVALID_SOCKET;
+		if (m_sock != INVALID_SOCKET) {
+			closesocket(m_sock);
+			m_sock = INVALID_SOCKET;
+		}
 	}
 
 	void UpdateAddress(int nIP, int nPort) {
@@ -227,6 +232,7 @@ public:
 	}
 
 private:
+
 	HANDLE m_eventInvoke;//启动事件
 	UINT m_nThreadID;
 	typedef void(CClientSocket::* MSGFUNC)(UINT nMsg, WPARAM wParam, LPARAM lParam);
@@ -244,25 +250,17 @@ private:
 	SOCKET m_sock;
 	CPacket m_packet;
 	CClientSocket& operator=(const CClientSocket& ss) {};
-	CClientSocket(const CClientSocket& ss) {
-		m_sock = ss.m_sock;
-		m_nIP = ss.m_nIP;
-		m_nPort = ss.m_nPort;
-	};
-	CClientSocket() {
-		m_sock = INVALID_SOCKET;
-		if (InitSockEnv() == FALSE) {
-			MessageBox(NULL, _T("无法初始化套接字环境, 请检查网络设置！"), _T("初始化错误！"), MB_OK | MB_ICONERROR);
-			exit(0);
-		}
-		m_buffer.resize(BUFFER_SIZE);
-		memset(m_buffer.data(), 0, BUFFER_SIZE);
-	};
+	CClientSocket(const CClientSocket& ss);
+	CClientSocket();
 
 	~CClientSocket() {
-		closesocket(m_sock);
-		WSACleanup();
-	};
+	Shutdown();
+};
+	static unsigned __stdcall threadEntry(void* arg);
+	void Shutdown();
+	void threadFunc();
+	void threadFunc2();
+
 	BOOL InitSockEnv()
 	{
 		WSADATA data;
@@ -273,14 +271,21 @@ private:
 
 	};
 	static void releaseInstance() {
+		TRACE("CClientSocket has been called!\r\n");
 		if (m_instance != NULL) {
 			CClientSocket* tmp = m_instance;
 			m_instance = NULL;
 			delete tmp;
 		}
 	}
-	static CClientSocket* m_instance;
+	bool Send(const char* pData, int nSize) {
+		if (m_sock == -1)return false;
+		return send(m_sock, pData, nSize, 0) > 0;
+	}
+	bool Send(const CPacket& pack);
+	void SendPack(UINT nMsg, WPARAM wParam/*缓冲区的值*/, LPARAM lParam/*缓冲区的长度*/);
 
+	static CClientSocket* m_instance;
 	class CHelper
 	{
 	public:

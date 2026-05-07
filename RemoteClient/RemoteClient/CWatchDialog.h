@@ -1,8 +1,9 @@
-ï»¿#pragma once
+#pragma once
 #include "afxdialogex.h"
+#include "ClientSocket.h"
 
 
-// CWatchDialog å¯¹è¯æ¡†
+// CWatchDialog ¶Ô»°¿ò
 
 class CWatchDialog : public CDialog
 {
@@ -10,21 +11,23 @@ class CWatchDialog : public CDialog
 
 public:
 
-	CWatchDialog(CWnd* pParent = nullptr);   // æ ‡å‡†æ„é€ å‡½æ•°
+	CWatchDialog(CWnd* pParent = nullptr);   // ±ê×¼¹¹Ôìº¯Êı
 	virtual ~CWatchDialog();
 
 
-// å¯¹è¯æ¡†æ•°æ®
+// ¶Ô»°¿òÊı¾İ
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_DLG_WATCH };
 #endif
 public:
-	int m_nObjWidth;
+    int m_nObjWidth;
+    ULONGLONG m_lastMouseSendTick;
+    CPoint m_lastMousePoint;
 	int m_nObjHeight;
 	CImage m_image;
 protected:
-	bool m_isFull;//ç¼“å­˜æ˜¯å¦æœ‰æ•°æ® trueè¡¨ç¤ºæœ‰ç¼“å­˜æ•°æ® falseè¡¨ç¤ºæ²¡æœ‰ç¼“å­˜æ•°æ®
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV æ”¯æŒ
+	bool m_isFull;//»º´æÊÇ·ñÓĞÊı¾İ true±íÊ¾ÓĞ»º´æÊı¾İ false±íÊ¾Ã»ÓĞ»º´æÊı¾İ
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
 	DECLARE_MESSAGE_MAP()
 public:
 	CImage& GetImage() {
@@ -33,6 +36,7 @@ public:
 	void SetImageStatus(bool isFull = false) {
 		m_isFull = isFull;
 	}
+	bool UpdateImage(const std::string& imageData);
 	bool isFull() const {
 		return m_isFull;
 	}
@@ -51,4 +55,7 @@ public:
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnStnClickedWatch();
+	afx_msg LRESULT OnSendPackAck(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnBnClickedBtnLock();
+	afx_msg void OnBnClickedBtnUnlock();
 };

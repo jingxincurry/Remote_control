@@ -3,6 +3,12 @@
 
 #include <map>
 
+namespace {
+	CStringA CStringToAnsi(const CString& text)
+	{
+		return CStringA(text);
+	}
+}
 std::map<UINT, CClientController::MSGFUNC> CClientController::m_mapFunc;
 CClientController* CClientController::m_instance = NULL;
 CClientController::CHelper CClientController::m_helper;
@@ -90,7 +96,11 @@ void CClientController::threadEntryForDownFile(void* arg)
 void CClientController::threadDownFile()
 {
 	FILE* pFile = NULL;
+#ifdef UNICODE
+	_wfopen_s(&pFile, m_strLocal, L"wb+");
+#else
 	fopen_s(&pFile, m_strLocal, "wb+");
+#endif
 	if (pFile == NULL) {
 		m_remoteDlg.MessageBox(_T("本地没有权限保存该文件，或者文件无法创建！！！"));
 		m_statusDlg.ShowWindow(SW_HIDE);
@@ -98,36 +108,16 @@ void CClientController::threadDownFile()
 		return;
 	}
 
-	CClientSocket* pClient = CClientSocket::getInstance();
-	do {
-		int ret = SendCommandPacket(m_remoteDlg.GetSafeHwnd(), 4, false, (BYTE*)(LPCSTR)m_strRemote, m_strRemote.GetLength());
-		if (ret < 0) {
-			m_remoteDlg.MessageBox(_T("执行下载命令失败！！"));
-			TRACE("执行下载失败：ret = %d\r\n", ret);
-			break;
-		}
-		long long nLength = *(long long*)pClient->GetPacket().strData.c_str();
-		if (nLength == 0) {
-			m_remoteDlg.MessageBox(_T("文件长度为零或者无法读取文件！！！"));
-			break;
-		}
-		long long nCount = 0;
-		while (nCount < nLength) {
-			ret = pClient->DealCommand();
-			if (ret < 0) {
-				m_remoteDlg.MessageBox(_T("传输失败！！"));
-				TRACE("传输失败：ret = %d\r\n", ret);
-				break;
-			}
-			fwrite(pClient->GetPacket().strData.c_str(), 1, pClient->GetPacket().strData.size(), pFile);
-			nCount += pClient->GetPacket().strData.size();
-		}
-	} while (false);
-
-	fclose(pFile);
-	pClient->CloseSocket();
-
-	DownloadEnd();
+	CStringA remotePath = CStringToAnsi(m_strRemote);
+	int ret = SendCommandPacket(m_remoteDlg.GetSafeHwnd(), 4, false,
+		(BYTE*)(LPCSTR)remotePath, remotePath.GetLength(), (WPARAM)pFile);
+	if (ret < 0) {
+		m_remoteDlg.MessageBox(_T("执行下载命令发送失败！！"));
+		TRACE("执行下载失败：ret = %d\r\n", ret);
+		fclose(pFile);
+		m_statusDlg.ShowWindow(SW_HIDE);
+		m_remoteDlg.EndWaitCursor();
+	}
 }
 
 void CClientController::StartWatchScreen()
@@ -142,7 +132,7 @@ void CClientController::StartWatchScreen()
 void CClientController::threadWatchScreen()
 {
 	Sleep(50);
-	ULONGLONG nTick = GetTickCount64();
+	ULONGLONG nTick = GetTickCount64();  //第一次获取图片的时间点
 	while (!m_isClosed) {
 		if (m_watchDlg.isFull() == false) {
 			if (GetTickCount64() - nTick < 200) {
@@ -150,13 +140,7 @@ void CClientController::threadWatchScreen()
 			}
 			nTick = GetTickCount64();
 			int ret = SendCommandPacket(m_watchDlg.GetSafeHwnd(), 6, true, NULL, 0);
-			if (ret == 6) {
-				CImage& image = m_watchDlg.GetImage();
-				if (GetImage(image) == S_OK) {
-					m_watchDlg.SetImageStatus(true);
-				}
-			}
-			else {
+			if (ret == 0) {
 				TRACE("获取图片失败！ret = %d\r\n", ret);
 			}
 		}
@@ -221,6 +205,8 @@ unsigned __stdcall CClientController::threadEntry(void* arg)
 	_endthreadex(0);
 	return 0;
 }
+
+
 
 LRESULT CClientController::OnShowStatus(UINT nMsg, WPARAM wParam, LPARAM lParam)
 {

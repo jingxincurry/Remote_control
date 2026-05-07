@@ -1,5 +1,4 @@
-﻿
-// RemoteClientDlg.h: 头文件
+﻿// RemoteClientDlg.h: 头文件
 //
 
 #pragma once
@@ -36,9 +35,18 @@ private:
 
 	/*static void threadEntryForDownFile(void* arg);
 	void threadDownFile();*/
+	void DealCommand(WORD nCmd, const std::string& strData, LPARAM lParam);
+	void InitUIData();
+
 
 	void LoadFileCurrent();
+
+	void Str2Tree(const std::string& drivers, CTreeCtrl& tree);
+
 	void LoadFileInfo();
+	void UpdateFileInfo(const FILEINFO& finfo, HTREEITEM hParent);
+	void UpdateDownloadFile(const std::string& strData, FILE* pFile);
+
 	CString GetPath(HTREEITEM hTree);
 	void DeleteTreeChildrenItem(HTREEITEM hTree);
 	
@@ -56,6 +64,7 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
+	afx_msg void OnDestroy();
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedBtnTest();
@@ -79,5 +88,6 @@ public:
 	afx_msg void OnBnClickedBtnStartWatch();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnEnChangeEditPort();
+	afx_msg LRESULT OnSendPackAck(WPARAM wParam, LPARAM lParam);
 };
 

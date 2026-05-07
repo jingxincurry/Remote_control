@@ -13,6 +13,23 @@
 #include "pch.h"
 #include "framework.h"
 
+namespace {
+	std::wstring AnsiPathToWide(const std::string& text)
+	{
+		if (text.empty()) {
+			return std::wstring();
+		}
+
+		int length = MultiByteToWideChar(CP_ACP, 0, text.data(), static_cast<int>(text.size()), NULL, 0);
+		if (length <= 0) {
+			return std::wstring();
+		}
+
+		std::wstring wide(length, L'\0');
+		MultiByteToWideChar(CP_ACP, 0, text.data(), static_cast<int>(text.size()), &wide[0], length);
+		return wide;
+	}
+}
 class CCommand
 {
 public:
@@ -147,7 +164,8 @@ protected:
 
     int RunFile(std::list<CPacket>& lstPacket, CPacket& inPacket) {
         std::string strPath = inPacket.strData;
-        ShellExecuteA(NULL, NULL, strPath.c_str(), NULL, NULL, SW_SHOW);
+        std::wstring widePath = AnsiPathToWide(strPath);
+        ShellExecuteW(NULL, NULL, widePath.c_str(), NULL, NULL, SW_SHOW);
         lstPacket.push_back(CPacket(3, NULL, 0));
         return 0;
     }
@@ -156,7 +174,8 @@ protected:
         std::string strPath = inPacket.strData;
         long long data = 0;
         FILE* fp = NULL;
-        errno_t err = fopen_s(&fp, strPath.c_str(), "rb");
+        std::wstring widePath = AnsiPathToWide(strPath);
+        errno_t err = _wfopen_s(&fp, widePath.c_str(), L"rb");
 
         if (err != 0) {
             lstPacket.push_back(CPacket(4, (BYTE*)&data, 8));
@@ -189,6 +208,8 @@ protected:
     int MouseEvent(std::list<CPacket>& lstPacket, CPacket& inPacket) {
         MOUSEEV mouse;
 		memcpy(&mouse, inPacket.strData.c_str(), sizeof(MOUSEEV));
+        TRACE("mouse x=%d y=%d button=%d action=%d\r\n",
+            mouse.ptXY.x, mouse.ptXY.y, mouse.nButton, mouse.nAction);
         
         DWORD nFlags = 0;
         switch (mouse.nButton)
@@ -206,22 +227,22 @@ protected:
             nFlags = 8;
             break;
         }
-        if (nFlags != 8) {
-            SetCursorPos(mouse.ptXY.x, mouse.ptXY.y);
-        }
+        SetCursorPos(mouse.ptXY.x, mouse.ptXY.y);
         switch (mouse.nAction)
         {
         case 0: //单击
-            nFlags = 0x10;
+            nFlags |= 0x10;
             break;
         case 1: //双击
-            nFlags = 0x20;
+            nFlags |= 0x20;
             break;
         case 2: //按下
-            nFlags = 0x40;
+            nFlags |= 0x40;
             break;
         case 3: //放开
-            nFlags = 0x80;
+            nFlags |= 0x80;
+            break;
+        case 4: //移动
             break;
         default: //不作处理 
             break;
@@ -269,8 +290,7 @@ protected:
         case 0x84: //中键放开
             mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, GetMessageExtraInfo());
             break;
-        case 0x08: //单词鼠标移动
-            mouse_event(MOUSEEVENTF_MOVE, mouse.ptXY.x, mouse.ptXY.y, 0, GetMessageExtraInfo());
+        case 0x08: //鼠标移动
             break;
         }
         lstPacket.push_back(CPacket(5, NULL, 0));
@@ -343,13 +363,8 @@ protected:
     int DeleteLocalFile(std::list<CPacket>& lstPacket, CPacket& inPacket)
     {
         std::string strPath = inPacket.strData;
-        
-        TCHAR sPath[MAX_PATH] = _T("");
-        //mbstowcs(sPath, strPath.c_str(), strPath.size()); //中文容易乱码
-        MultiByteToWideChar(
-            CP_ACP, 0, strPath.c_str(), strPath.size(), sPath,
-            sizeof(sPath) / sizeof(TCHAR));
-        DeleteFileA(strPath.c_str());
+        std::wstring widePath = AnsiPathToWide(strPath);
+        DeleteFileW(widePath.c_str());
         lstPacket.push_back(CPacket(9, NULL, 0));
         return 0;
     }
