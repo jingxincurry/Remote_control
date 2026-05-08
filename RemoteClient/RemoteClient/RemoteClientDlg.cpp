@@ -125,24 +125,9 @@ BOOL CRemoteClientDlg::OnInitDialog()
 	}
 
 	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
-	//  执行此操作
-	SetIcon(m_hIcon, TRUE);			// 设置大图标
-	SetIcon(m_hIcon, FALSE);		// 设置小图标
+	
 
-	// TODO: 在此添加额外的初始化代码
-	UpdateData();
-	/*m_server_address = MAKEIPADDRESS(172, 20, 10, 3);*/
-	m_server_address = MAKEIPADDRESS(192, 168, 43, 250);
-	m_nPort = _T("9527");
-	CClientController* pController = CClientController::getInstance();
-	pController->UpdateAddress(m_server_address, atoi((LPCTSTR)m_nPort));
-
-	UpdateData(FALSE);
-
-	m_dlgStatus.Create(IDD_DLG_STATUS, this); // 创建状态对话框
-	m_dlgStatus.ShowWindow(SW_HIDE); // 显示状态对话框
-
-    
+	InitUIData();
 	m_isClosed = true;
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 
@@ -482,18 +467,22 @@ LRESULT CRemoteClientDlg::OnSendPackAck(WPARAM wParam, LPARAM lParam)
 
 void CRemoteClientDlg::InitUIData()
 {
-	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
+
+	// TODO: 在此添加额外的初始化代码
 	UpdateData();
-	m_server_address = 0x7F000001;//0xC0A80167;//192.168.1.103
+	/*m_server_address = MAKEIPADDRESS(172, 20, 10, 3);*/
+	m_server_address = MAKEIPADDRESS(192, 168, 43, 250);
 	m_nPort = _T("9527");
 	CClientController* pController = CClientController::getInstance();
 	pController->UpdateAddress(m_server_address, atoi((LPCTSTR)m_nPort));
+
 	UpdateData(FALSE);
-	m_dlgStatus.Create(IDD_DLG_STATUS, this);
-	m_dlgStatus.ShowWindow(SW_HIDE);
+
+	m_dlgStatus.Create(IDD_DLG_STATUS, this); // 创建状态对话框
+	m_dlgStatus.ShowWindow(SW_HIDE); // 显示状态对话框
 }
 
 void CRemoteClientDlg::LoadFileCurrent()
