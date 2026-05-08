@@ -131,7 +131,8 @@ BOOL CRemoteClientDlg::OnInitDialog()
 
 	// TODO: 在此添加额外的初始化代码
 	UpdateData();
-	m_server_address = MAKEIPADDRESS(172, 20, 10, 3);
+	/*m_server_address = MAKEIPADDRESS(172, 20, 10, 3);*/
+	m_server_address = MAKEIPADDRESS(192, 168, 43, 250);
 	m_nPort = _T("9527");
 	CClientController* pController = CClientController::getInstance();
 	pController->UpdateAddress(m_server_address, atoi((LPCTSTR)m_nPort));
@@ -281,7 +282,7 @@ void CRemoteClientDlg::LoadFileInfo()
 }
 
 void CRemoteClientDlg::UpdateFileInfo(const FILEINFO& finfo, HTREEITEM hParent)
-{
+{   //case 2:
 	TRACE("hasnext %d isdirectory %d %s\r\n", finfo.HasNext, finfo.IsDirectory, finfo.szFileName);
 	if (finfo.HasNext == FALSE)return;
 	if (finfo.IsDirectory) {
@@ -290,7 +291,7 @@ void CRemoteClientDlg::UpdateFileInfo(const FILEINFO& finfo, HTREEITEM hParent)
 		TRACE("hselected %08X %08X\r\n", hParent, m_Tree.GetSelectedItem());
 		HTREEITEM hTemp = m_Tree.InsertItem(finfo.szFileName, hParent);
 		m_Tree.InsertItem("", hTemp, TVI_LAST);
-		m_Tree.Expand(hParent, TVE_EXPAND);
+		m_Tree.Expand(hParent, TVE_EXPAND);  //节点展开 
 	}
 	else {
 		m_List.InsertItem(0, finfo.szFileName);
