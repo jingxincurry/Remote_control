@@ -81,13 +81,14 @@ public:
 	CListCtrl m_List;
 	afx_msg void OnNMRClickListFile(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDownloadFile();
-	afx_msg void OnDeleteFile();
-	afx_msg void OnOpenFile();
+	afx_msg void OnDeleteFile();  //删除文件
+	afx_msg void OnOpenFile(); //打开文件
 
 	
 	afx_msg void OnBnClickedBtnStartWatch();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnEnChangeEditPort();
 	afx_msg LRESULT OnSendPackAck(WPARAM wParam, LPARAM lParam);
+
 };
 

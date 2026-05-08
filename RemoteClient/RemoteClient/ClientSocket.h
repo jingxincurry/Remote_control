@@ -22,7 +22,7 @@ public:
 	CPacket()
 		:sHead(0), nLength(0), sCmd(0), sSum(0)
 	{};
-   CPacket(WORD nCmd, const BYTE* pData, size_t nSize)
+	CPacket(WORD nCmd, const BYTE* pData, size_t nSize)
 		: sHead(0xFEFF), nLength(static_cast<DWORD>(nSize + 4)), sCmd(nCmd), sSum(0) {
 		if (nSize > 0) {
 			strData.resize(nSize);
@@ -120,7 +120,7 @@ public:
 	WORD sSum; //和校验            2
 	std::string strOut;
 
-	HANDLE hEvent; //等待应答的事件
+	//HANDLE hEvent; //等待应答的事件
 };
 #pragma pack(pop)
 
@@ -206,7 +206,7 @@ public:
 
 	
 
-	int SendPacket(HWND hWnd, const CPacket& pack, bool isAutoClosed = true, WPARAM wParam = 0);
+	bool SendPacket(HWND hWnd, const CPacket& pack, bool isAutoClosed = true, WPARAM wParam = 0);
 
 
 	bool GetFilePath(std::string& strPath);
@@ -254,11 +254,13 @@ private:
 	CClientSocket();
 
 	~CClientSocket() {
-	Shutdown();
-};
+		closesocket(m_sock);
+		m_sock = INVALID_SOCKET;
+		WSACleanup();
+	};
 	static unsigned __stdcall threadEntry(void* arg);
-	void Shutdown();
-	void threadFunc();
+	//void Shutdown();
+	//void threadFunc();
 	void threadFunc2();
 
 	BOOL InitSockEnv()

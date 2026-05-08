@@ -28,7 +28,7 @@ namespace {
 		std::wstring wide(length, L'\0');
 		MultiByteToWideChar(CP_ACP, 0, text.data(), static_cast<int>(text.size()), &wide[0], length);
 		return wide;
-	}
+	} 
 }
 class CCommand
 {

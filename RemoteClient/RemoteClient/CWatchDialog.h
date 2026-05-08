@@ -1,7 +1,9 @@
 #pragma once
 #include "afxdialogex.h"
 #include "ClientSocket.h"
-
+#ifndef WM_SEND_PACK_ACK
+#define WM_SEND_PACK_ACK (WM_USER+2) //发送包数据应答
+#endif
 
 // CWatchDialog 对话框
 

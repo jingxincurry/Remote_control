@@ -81,7 +81,7 @@ BOOL CWatchDialog::OnInitDialog()
 
 	m_isFull = false;
 	
-	SetTimer(0, 45, NULL);
+	//SetTimer(0, 45, NULL);
 	return TRUE;
 }
 
@@ -90,7 +90,7 @@ BOOL CWatchDialog::OnInitDialog()
 void CWatchDialog::OnTimer(UINT_PTR nIDEvent)
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-	if (nIDEvent == 0) {
+	/*if (nIDEvent == 0) {
 		CClientController* pParent = CClientController::getInstance();
 		if (m_isFull) {
 			CRect rect;
@@ -105,7 +105,7 @@ void CWatchDialog::OnTimer(UINT_PTR nIDEvent)
 			m_image.Destroy();
 			m_isFull = false;
 		}
-	}
+	}*/
 	CDialog::OnTimer(nIDEvent);
 }
 
@@ -254,7 +254,7 @@ LRESULT CWatchDialog::OnSendPackAck(WPARAM wParam, LPARAM lParam)
 	else {
 		CPacket* pPacket = (CPacket*)wParam;
 		if (pPacket != NULL) {
-			CPacket head = *(CPacket*)wParam;
+			CPacket head = *(CPacket*)wParam;  
 			delete (CPacket*)wParam;
 			switch (head.sCmd) {
 			case 6:

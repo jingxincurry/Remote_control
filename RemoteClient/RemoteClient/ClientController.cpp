@@ -51,7 +51,7 @@ int CClientController::Invoke(CWnd*& pMainWnd)
 	return m_remoteDlg.DoModal();
 }
 
-int CClientController::SendCommandPacket(HWND hWnd, int nCmd, bool bAutoClose, BYTE* pData, size_t nLength, WPARAM wParam)
+bool CClientController::SendCommandPacket(HWND hWnd, int nCmd, bool bAutoClose, BYTE* pData, size_t nLength, WPARAM wParam)
 {
 	TRACE("cmd:%d %s start %lld \r\n", nCmd, __FUNCTION__, GetTickCount64());
 	CClientSocket* pClient = CClientSocket::getInstance();
@@ -132,7 +132,7 @@ void CClientController::StartWatchScreen()
 void CClientController::threadWatchScreen()
 {
 	Sleep(50);
-	ULONGLONG nTick = GetTickCount64();  //第一次获取图片的时间点
+	ULONGLONG nTick = GetTickCount64();
 	while (!m_isClosed) {
 		if (m_watchDlg.isFull() == false) {
 			if (GetTickCount64() - nTick < 200) {
@@ -140,7 +140,10 @@ void CClientController::threadWatchScreen()
 			}
 			nTick = GetTickCount64();
 			int ret = SendCommandPacket(m_watchDlg.GetSafeHwnd(), 6, true, NULL, 0);
-			if (ret == 0) {
+			if (ret == 1) {
+				//TRACE("成功发送请求图片命令\r\n");
+			}
+			else {
 				TRACE("获取图片失败！ret = %d\r\n", ret);
 			}
 		}

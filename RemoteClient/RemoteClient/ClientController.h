@@ -45,7 +45,7 @@ public:
 	//8 解锁
 	//1981 测试连接
 	//返回值：是状态，true是成功 false是失败
-	int SendCommandPacket(
+	bool SendCommandPacket(
 		HWND hWnd,//数据包受到后，需要应答的窗口
 		int nCmd,
 		bool bAutoClose = true,

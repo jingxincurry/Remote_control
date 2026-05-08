@@ -91,7 +91,7 @@ BEGIN_MESSAGE_MAP(CRemoteClientDlg, CDialogEx)
 	ON_COMMAND(ID_DOWNLOAD_FILE, &CRemoteClientDlg::OnDownloadFile)
 	ON_COMMAND(ID_DELETE_FILE, &CRemoteClientDlg::OnDeleteFile)
 	ON_COMMAND(ID_OPEN_FILE, &CRemoteClientDlg::OnOpenFile)
-	
+
 	ON_BN_CLICKED(IDC_BTN_START_WATCH, &CRemoteClientDlg::OnBnClickedBtnStartWatch)
 	ON_WM_TIMER()
 	ON_EN_CHANGE(IDC_EDIT_PORT, &CRemoteClientDlg::OnEnChangeEditPort)
@@ -462,10 +462,19 @@ void CRemoteClientDlg::DealCommand(WORD nCmd, const std::string& strData, LPARAM
 
 LRESULT CRemoteClientDlg::OnSendPackAck(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam != NULL) {
-		CPacket* pPacket = (CPacket*)wParam;
-		DealCommand(pPacket->sCmd, pPacket->strData, lParam);
-		delete pPacket;
+	if (lParam == -1 || (lParam == -2)) {
+		TRACE("socket is error %d\r\n", lParam);
+	}
+	else if (lParam == 1) {
+		//对方关闭了套接字
+		TRACE("socket is closed!\r\n");
+	}
+	else {
+		if (wParam != NULL) {
+			CPacket head = *(CPacket*)wParam;
+			delete (CPacket*)wParam;
+			DealCommand(head.sCmd, head.strData, lParam);
+		}
 	}
 	return 0;
 }
@@ -581,6 +590,8 @@ void CRemoteClientDlg::OnOpenFile()
 		AfxMessageBox("打开文件命令执行失败！！！");
 	}
 }
+
+
 
 void CRemoteClientDlg::OnBnClickedBtnStartWatch() 
 {
