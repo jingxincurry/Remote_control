@@ -101,6 +101,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SuppressStartupBanner>false</SuppressStartupBanner>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -156,6 +157,10 @@
   <ItemGroup>
     <ClInclude Include="Command.h" />
     <ClInclude Include="LockDialog.h" />
+    <ClInclude Include="CMirrorQueue.h" />
+    <ClInclude Include="MirrorServer.h" />
+    <ClInclude Include="MirrorThread.h" />
+    <ClInclude Include="MirrorTool.h" />
     <ClInclude Include="Packet.h" />
     <ClInclude Include="ServerSocket.h" />
     <ClInclude Include="framework.h" />
@@ -167,6 +172,7 @@
   <ItemGroup>
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="LockDialog.cpp" />
+    <ClCompile Include="MirrorServer.cpp" />
     <ClCompile Include="MirrorTool.cpp" />
     <ClCompile Include="ServerSocket.cpp" />
     <ClCompile Include="pch.cpp">

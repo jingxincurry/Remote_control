@@ -42,6 +42,18 @@
     <ClInclude Include="Packet.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MirrorTool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MirrorThread.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MirrorServer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CMirrorQueue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RemoteCtrl.cpp">
@@ -60,6 +72,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Command.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MirrorServer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
