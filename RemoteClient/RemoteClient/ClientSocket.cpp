@@ -56,14 +56,14 @@ CClientSocket::CClientSocket() :
     m_hThread(INVALID_HANDLE_VALUE)
 {
     if (InitSockEnv() == FALSE) {
-        MessageBox(NULL, _T("ÎÞ·¨³õÊ¼»¯Ì×½Ó×Ö»·¾³,Çë¼ì²éÍøÂçÉèÖÃ£¡"), _T("³õÊ¼»¯´íÎó£¡"), MB_OK | MB_ICONERROR);
+        MessageBox(NULL, _T("æ— æ³•åˆå§‹åŒ–å¥—æŽ¥å­—çŽ¯å¢ƒ,è¯·æ£€æŸ¥ç½‘ç»œè®¾ç½®ï¼"), _T("åˆå§‹åŒ–é”™è¯¯ï¼"), MB_OK | MB_ICONERROR);
         exit(0);
     }
     m_eventInvoke = CreateEvent(NULL, TRUE, FALSE, NULL);
     m_hThread = (HANDLE)_beginthreadex(NULL, 0, &CClientSocket::threadEntry, this, 0, &m_nThreadID);
-    // ÐÞ¸´C6387¾¯¸æ£¬È·±£m_eventInvoke²»ÎªNULLÔÙµ÷ÓÃWaitForSingleObject
+    // ä¿®å¤C6387è­¦å‘Šï¼Œç¡®ä¿m_eventInvokeä¸ä¸ºNULLå†è°ƒç”¨WaitForSingleObject
     if (m_eventInvoke != NULL && WaitForSingleObject(m_eventInvoke, 100) == WAIT_TIMEOUT) {
-        TRACE("ÍøÂçÏûÏ¢´¦ÀíÏß³ÌÆô¶¯Ê§°ÜÁË£¡\r\n");
+        TRACE("ç½‘ç»œæ¶ˆæ¯å¤„ç†çº¿ç¨‹å¯åŠ¨å¤±è´¥äº†ï¼\r\n");
     }
     CloseHandle(m_eventInvoke);
     m_buffer.resize(BUFFER_SIZE);
@@ -77,7 +77,7 @@ CClientSocket::CClientSocket() :
     };
     for (int i = 0; funcs[i].message != 0; i++) {
         if (m_mapFunc.insert(std::pair<UINT, MSGFUNC>(funcs[i].message, funcs[i].func)).second == false) {
-            TRACE("²åÈëÊ§°Ü£¬ÏûÏ¢Öµ£º%d º¯ÊýÖµ:%08X ÐòºÅ:%d\r\n", funcs[i].message, funcs[i].func, i);
+            TRACE("æ’å…¥å¤±è´¥ï¼Œæ¶ˆæ¯å€¼ï¼š%d å‡½æ•°å€?%08X åºå·:%d\r\n", funcs[i].message, funcs[i].func, i);
         }
     }
 }
@@ -94,13 +94,13 @@ bool CClientSocket::InitSocket() {
     serv_adr.sin_addr.s_addr = htonl(m_nIP);
     serv_adr.sin_port = htons(m_nPort);
     if (serv_adr.sin_addr.s_addr == INADDR_NONE) {
-        AfxMessageBox("Ö¸¶¨µÄIPµØÖ·£¬²»´æÔÚ£¡");
+        AfxMessageBox(_T("æŒ‡å®šçš„IPåœ°å€ä¸å­˜åœ¨ï¼"));
         return false;
     }
     int ret = connect(m_sock, (sockaddr*)&serv_adr, sizeof(serv_adr));
     if (ret == -1) {
-        AfxMessageBox("Á¬½ÓÊ§°Ü!");
-        TRACE("Á¬½ÓÊ§°Ü£º%d %s\r\n", WSAGetLastError(), GetErrInfo(WSAGetLastError()).c_str());
+        AfxMessageBox(_T("è¿žæŽ¥å¤±è´¥!"));
+        TRACE("è¿žæŽ¥å¤±è´¥ï¼?d %s\r\n", WSAGetLastError(), GetErrInfo(WSAGetLastError()).c_str());
         return false;
     }
     TRACE("socket init done!\r\n");
@@ -175,7 +175,7 @@ void CClientSocket::SendPack(UINT nMsg, WPARAM wParam, LPARAM lParam)
                         memmove(pBuffer, pBuffer + nLen, index);
                     }
                 }
-                else {//TODO£º¶Ô·½¹Ø±ÕÁËÌ×½Ó×Ö£¬»òÕßÍøÂçÉè±¸Òì³£
+                else {//TODOï¼šå¯¹æ–¹å…³é—­äº†å¥—æŽ¥å­—ï¼Œæˆ–è€…ç½‘ç»œè®¾å¤‡å¼‚å¸?
                     TRACE("recv failed length %d index %d cmd %d\r\n", length, index, current.sCmd);
                     CloseSocket();
                     if (length < 0) {
@@ -187,7 +187,7 @@ void CClientSocket::SendPack(UINT nMsg, WPARAM wParam, LPARAM lParam)
         }
         else {
             CloseSocket();
-            //ÍøÂçÖÕÖ¹´¦Àí
+            //ç½‘ç»œç»ˆæ­¢å¤„ç†
             ::SendMessage(hWnd, WM_SEND_PACK_ACK, NULL, -1);
         }
     }
@@ -248,7 +248,7 @@ unsigned CClientSocket::threadEntry(void* arg)
 //            CPacket& head = m_lstSend.front();
 //            m_lock.unlock();
 //            if (Send(head) == false) {
-//                TRACE("·¢ËÍÊ§°Ü£¡\r\n");
+//                TRACE("å‘é€å¤±è´¥ï¼\r\n");
 //                continue;
 //            }
 //            std::map<HANDLE, std::list<CPacket>&>::iterator it;
@@ -262,7 +262,7 @@ unsigned CClientSocket::threadEntry(void* arg)
 //                        index += length;
 //                        size_t size = (size_t)index;
 //                        CPacket pack((BYTE*)pBuffer, size);
-//                        if (size > 0) {//TODO:¶ÔÓÚÎÄ¼þ¼ÐÐÅÏ¢»ñÈ¡£¬ÎÄ¼þÐÅÏ¢»ñÈ¡¿ÉÄÜ²úÉúÎÊÌâ
+//                        if (size > 0) {//TODO:å¯¹äºŽæ–‡ä»¶å¤¹ä¿¡æ¯èŽ·å–ï¼Œæ–‡ä»¶ä¿¡æ¯èŽ·å–å¯èƒ½äº§ç”Ÿé—®é¢˜
 //                            pack.hEvent = head.hEvent;
 //                            it->second.push_back(pack);
 //                            memmove(pBuffer, pBuffer + size, index - size);
@@ -276,12 +276,12 @@ unsigned CClientSocket::threadEntry(void* arg)
 //                    }
 //                    else if (length <= 0 && index <= 0) {
 //                        CloseSocket();
-//                        SetEvent(head.hEvent);//µÈµ½·þÎñÆ÷¹Ø±ÕÃüÁîÖ®ºó£¬ÔÙÍ¨ÖªÊÂÇéÍê³É
+//                        SetEvent(head.hEvent);//ç­‰åˆ°æœåŠ¡å™¨å…³é—­å‘½ä»¤ä¹‹åŽï¼Œå†é€šçŸ¥äº‹æƒ…å®Œæˆ
 //                        if (it0 != m_mapAutoClosed.end()) {
 //                            TRACE("SetEvent %d %d\r\n", head.sCmd, it0->second);
 //                        }
 //                        else {
-//                            TRACE("Òì³£µÄÇé¿ö£¬Ã»ÓÐ¶ÔÓ¦µÄpair\r\n");
+//                            TRACE("å¼‚å¸¸çš„æƒ…å†µï¼Œæ²¡æœ‰å¯¹åº”çš„pair\r\n");
 //                        }
 //                        break;
 //                    }

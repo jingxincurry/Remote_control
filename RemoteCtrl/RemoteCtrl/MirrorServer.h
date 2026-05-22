@@ -21,19 +21,19 @@ class MirrorOverlapped :public ThreadFuncBase
 {
 public:
 	OVERLAPPED m_overlapped;
-	DWORD m_operator;//²Ù×÷ ²Î¼ûEdoyunOperator
-	std::vector<char> m_buffer;//»º³åÇø
-	ThreadWorker m_worker;//´¦Àíº¯Êı
-	MirrorServer* m_server;//·şÎñÆ÷¶ÔÏó
-	MirrorClient* m_client;//¶ÔÓ¦µÄ¿Í»§¶Ë
+	DWORD m_operator;//æ“ä½œ å‚è§EdoyunOperator
+	std::vector<char> m_buffer;//ç¼“å†²åŒº
+	ThreadWorker m_worker;//å¤„ç†å‡½æ•°
+	MirrorServer* m_server;//æœåŠ¡å™¨å¯¹è±¡
+	MirrorClient* m_client;//å¯¹åº”çš„å®¢æˆ·ç«¯
 	WSABUF m_wsabuffer;
 	virtual ~MirrorOverlapped() {
 		m_client = NULL;
 	}
 };
 
-template<MirrorOperator>class AcceptOverlapped;  //½ÓÊÕÁ¬½ÓµÄÖØµş½á¹¹Ìå£¬°üº¬ÁËOVERLAPPED½á¹¹ÌåºÍÆäËûÏà¹ØĞÅÏ¢£¬ÓÃÓÚÒì²½½ÓÊÜÁ¬½Ó²Ù×÷
-typedef AcceptOverlapped<EAccept> ACCEPTOVERLAPPED;  //½ÓÊÕÁ¬½ÓµÄÖØµş½á¹¹ÌåÀàĞÍ¶¨Òå
+template<MirrorOperator>class AcceptOverlapped;  //æ¥æ”¶è¿æ¥çš„é‡å ç»“æ„ä½“ï¼ŒåŒ…å«äº†OVERLAPPEDç»“æ„ä½“å’Œå…¶ä»–ç›¸å…³ä¿¡æ¯ï¼Œç”¨äºå¼‚æ­¥æ¥å—è¿æ¥æ“ä½œ
+typedef AcceptOverlapped<EAccept> ACCEPTOVERLAPPED;  //æ¥æ”¶è¿æ¥çš„é‡å ç»“æ„ä½“ç±»å‹å®šä¹‰
 template<MirrorOperator>class RecvOverlapped;
 typedef RecvOverlapped<ERecv> RECVOVERLAPPED;
 template<MirrorOperator>class SendOverlapped;
@@ -69,18 +69,18 @@ public:
 	int Send(void* buffer, size_t nSize);
 	int SendData(std::vector<char>& data);
 private:
-	SOCKET m_sock;  //Ì×½Ó×Ö
-	DWORD m_received; //½ÓÊÕÊı¾İµÄ×Ö½ÚÊı
-	DWORD m_flags;  //½ÓÊÕÊı¾İµÄ±êÖ¾
-	std::shared_ptr<ACCEPTOVERLAPPED> m_overlapped; //ÖØµş½á¹¹Ìå£¬°üº¬ÁËOVERLAPPED½á¹¹ÌåºÍÆäËûÏà¹ØĞÅÏ¢£¬ÓÃÓÚÒì²½²Ù×÷
-	std::shared_ptr<RECVOVERLAPPED> m_recv;   //½ÓÊÕÖØµş½á¹¹Ìå£¬°üº¬ÁËOVERLAPPED½á¹¹ÌåºÍÆäËûÏà¹ØĞÅÏ¢£¬ÓÃÓÚÒì²½½ÓÊÕ²Ù×÷
-	std::shared_ptr<SENDOVERLAPPED> m_send;   //·¢ËÍÖØµş½á¹¹Ìå£¬°üº¬ÁËOVERLAPPED½á¹¹ÌåºÍÆäËûÏà¹ØĞÅÏ¢£¬ÓÃÓÚÒì²½·¢ËÍ²Ù×÷
+	SOCKET m_sock;  //å¥—æ¥å­—
+	DWORD m_received; //æ¥æ”¶æ•°æ®çš„å­—èŠ‚æ•°
+	DWORD m_flags;  //æ¥æ”¶æ•°æ®çš„æ ‡å¿—
+	std::shared_ptr<ACCEPTOVERLAPPED> m_overlapped; //é‡å ç»“æ„ä½“ï¼ŒåŒ…å«äº†OVERLAPPEDç»“æ„ä½“å’Œå…¶ä»–ç›¸å…³ä¿¡æ¯ï¼Œç”¨äºå¼‚æ­¥æ“ä½œ
+	std::shared_ptr<RECVOVERLAPPED> m_recv;   //æ¥æ”¶é‡å ç»“æ„ä½“ï¼ŒåŒ…å«äº†OVERLAPPEDç»“æ„ä½“å’Œå…¶ä»–ç›¸å…³ä¿¡æ¯ï¼Œç”¨äºå¼‚æ­¥æ¥æ”¶æ“ä½œ
+	std::shared_ptr<SENDOVERLAPPED> m_send;   //å‘é€é‡å ç»“æ„ä½“ï¼ŒåŒ…å«äº†OVERLAPPEDç»“æ„ä½“å’Œå…¶ä»–ç›¸å…³ä¿¡æ¯ï¼Œç”¨äºå¼‚æ­¥å‘é€æ“ä½œ
 	std::vector<char> m_buffer;
-	size_t m_used;//ÒÑ¾­Ê¹ÓÃµÄ»º³åÇø´óĞ¡
+	size_t m_used;//å·²ç»ä½¿ç”¨çš„ç¼“å†²åŒºå¤§å°
 	sockaddr_in m_laddr;
 	sockaddr_in m_raddr;
 	bool m_isbusy;
-	MirrorSendQueue<std::vector<char>> m_vecSend;//·¢ËÍÊı¾İ¶ÓÁĞ
+	MirrorSendQueue<std::vector<char>> m_vecSend;//å‘é€æ•°æ®é˜Ÿåˆ—
 };
 
 template<MirrorOperator>
@@ -137,7 +137,7 @@ class MirrorServer :public ThreadFuncBase
 {
 public:
 	MirrorServer(const std::string& ip = "0.0.0.0", short port = 9527) : m_pool(10) {
-		m_hIOCP = INVALID_HANDLE_VALUE; //IOCP¾ä±ú
+		m_hIOCP = INVALID_HANDLE_VALUE; //IOCPå¥æŸ„
 		m_sock = INVALID_SOCKET;
 		m_addr.sin_family = AF_INET;
 		m_addr.sin_port = htons(port);
@@ -158,7 +158,7 @@ public:
 			*pClient, *pClient))
 		{
 			if (WSAGetLastError() != ERROR_SUCCESS && (WSAGetLastError() != WSA_IO_PENDING)) {
-				TRACE("Á¬½ÓÊ§°Ü£º%d %s\r\n", WSAGetLastError(), CMirrorTool::GetErrInfo(WSAGetLastError()).c_str());
+				TRACE("è¿æ¥å¤±è´¥ï¼š%d %s\r\n", WSAGetLastError(), CMirrorTool::GetErrInfo(WSAGetLastError()).c_str());
 				closesocket(m_sock);
 				m_sock = INVALID_SOCKET;
 				m_hIOCP = INVALID_HANDLE_VALUE;
@@ -168,6 +168,7 @@ public:
 		return true;
 	}
 	void BindNewSocket(SOCKET s, ULONG_PTR nKey);
+	ULONG_PTR ListenerCompletionKey() const { return (ULONG_PTR)this; }
 
 private:
 	void CreateSocket() {

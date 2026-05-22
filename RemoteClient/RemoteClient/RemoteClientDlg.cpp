@@ -1,4 +1,4 @@
-// RemoteClientDlg.cpp: ÊµÏÖÎÄ¼ş
+// RemoteClientDlg.cpp: ç€¹ç‚µå¹‡é‚å›¦æ¬¢
 //
 
 #include "pch.h"
@@ -19,24 +19,29 @@ namespace {
 	{
 		return CStringA(text);
 	}
+
+	int CStringToInt(const CString& text)
+	{
+		return _ttoi(text);
+	}
 }
 
-// ÓÃÓÚÓ¦ÓÃ³ÌĞò¡°¹ØÓÚ¡±²Ëµ¥ÏîµÄ CAboutDlg ¶Ô»°¿ò
+// é¢ã„¤ç°¬æ´æ—‚æ•¤ç»‹å¬ªç°­éˆ¥æ»ƒå§æµœåº˜â‚¬æ¿Šå½é—æ›¢ã€é¨?CAboutDlg ç€µç¡…ç˜½å¦—?
 
 class CAboutDlg : public CDialogEx
 {
 public:
 	CAboutDlg();
 
-// ¶Ô»°¿òÊı¾İ
+// ç€µç¡…ç˜½å¦—å—˜æšŸé¹?
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
 	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV é€îˆ›å¯”
 	
-// ÊµÏÖ
+// ç€¹ç‚µå¹‡
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -98,15 +103,15 @@ BEGIN_MESSAGE_MAP(CRemoteClientDlg, CDialogEx)
 	ON_MESSAGE(WM_SEND_PACK_ACK, &CRemoteClientDlg::OnSendPackAck)
 END_MESSAGE_MAP()
 
-// CRemoteClientDlg ÏûÏ¢´¦Àí³ÌĞò
+// CRemoteClientDlg å¨‘å Ÿä¼…æ¾¶å‹­æ‚Šç»‹å¬ªç°­
 
 BOOL CRemoteClientDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	// ½«¡°¹ØÓÚ...¡±²Ëµ¥ÏîÌí¼Óµ½ÏµÍ³²Ëµ¥ÖĞ¡£
+	// çå—â‚¬æ»ƒå§æµœ?..éˆ¥æ¿Šå½é—æ›¢ã€å¨£è¯²å§é’æ‰®éƒ´ç¼ç†»å½é—æ›šè…‘éŠ†?
 
-	// IDM_ABOUTBOX ±ØĞëÔÚÏµÍ³ÃüÁî·¶Î§ÄÚ¡£
+	// IDM_ABOUTBOX è¹‡å‘´ã€é¦ã„§éƒ´ç¼ç†·æ‡¡æµ ã‚ˆå¯–é¥æ‘å”´éŠ†?
 	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
 	ASSERT(IDM_ABOUTBOX < 0xF000);
 
@@ -124,12 +129,12 @@ BOOL CRemoteClientDlg::OnInitDialog()
 		}
 	}
 
-	// ÉèÖÃ´Ë¶Ô»°¿òµÄÍ¼±ê¡£  µ±Ó¦ÓÃ³ÌĞòÖ÷´°¿Ú²»ÊÇ¶Ô»°¿òÊ±£¬¿ò¼Ü½«×Ô¶¯
+	// ç’å‰§ç–†å§ã‚…î‡®ç’‡æ¿‡î”‹é¨å‹«æµ˜éå›¥â‚¬? è¤°æ’³ç°²é¢ã„§â–¼æ´å¿å¯Œç»æ¥€å½›æ¶“å¶†æ§¸ç€µç¡…ç˜½å¦—å—˜æ¤‚é”›å±¾î”‹é‹è·ºçš¢é‘·î„å§©
 	
 
 	InitUIData();
 	m_isClosed = true;
-	return TRUE;  // ³ı·Ç½«½¹µãÉèÖÃµ½¿Ø¼ş£¬·ñÔò·µ»Ø TRUE
+	return TRUE;  // é—„ã‚‰æ½ªçå—™åŠéç¡…î†•ç¼ƒî†¼åŸŒéºÑ‚æ¬¢é”›å±½æƒé’æ¬’ç¹‘é¥?TRUE
 
 }
 
@@ -146,19 +151,19 @@ void CRemoteClientDlg::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 }
 
-// Èç¹ûÏò¶Ô»°¿òÌí¼Ó×îĞ¡»¯°´Å¥£¬ÔòĞèÒªÏÂÃæµÄ´úÂë
-//  À´»æÖÆ¸ÃÍ¼±ê¡£  ¶ÔÓÚÊ¹ÓÃÎÄµµ/ÊÓÍ¼Ä£ĞÍµÄ MFC Ó¦ÓÃ³ÌĞò£¬
-//  Õâ½«ÓÉ¿ò¼Ü×Ô¶¯Íê³É¡£
+// æ¿¡å‚›ç‰éšæˆî‡®ç’‡æ¿‡î”‹å¨£è¯²å§éˆâ‚¬çå¿“å¯²é¸å¤æŒ³é”›å±½å¯é—‡â‚¬ç‘•ä½·ç¬…é—ˆãˆ¢æ®‘æµ ï½‡çˆœ
+//  é‰ãƒ§ç²¯é’æƒ°î‡šé¥ç‚¬çˆ£éŠ†? ç€µé€›ç°¬æµ£è·¨æ•¤é‚å›¨ã€‚/ç‘™å——æµ˜å¦¯â€³ç€·é¨?MFC æ´æ—‚æ•¤ç»‹å¬ªç°­é”›?
+//  æ©æ¬çš¢é¢è¾¨î”‹é‹æƒ°åšœé”ã„¥ç•¬é´æ„©â‚¬?
 
 void CRemoteClientDlg::OnPaint()
 {
 	if (IsIconic())
 	{
-		CPaintDC dc(this); // ÓÃÓÚ»æÖÆµÄÉè±¸ÉÏÏÂÎÄ
+		CPaintDC dc(this); // é¢ã„¤ç°¬ç¼æ¨ºåŸ—é¨å‹®î†•æ¾¶å›¦ç¬‚æ¶“å¬«æƒ
 
 		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
-		// Ê¹Í¼±êÔÚ¹¤×÷Çø¾ØĞÎÖĞ¾ÓÖĞ
+		// æµ£å®æµ˜éå›§æ¹ªå®¸ãƒ¤ç¶”é–è™¹ç…©è¤°î­è…‘çå‘¬è…‘
 		int cxIcon = GetSystemMetrics(SM_CXICON);
 		int cyIcon = GetSystemMetrics(SM_CYICON);
 		CRect rect;
@@ -166,7 +171,7 @@ void CRemoteClientDlg::OnPaint()
 		int x = (rect.Width() - cxIcon + 1) / 2;
 		int y = (rect.Height() - cyIcon + 1) / 2;
 
-		// »æÖÆÍ¼±ê
+		// ç¼æ¨ºåŸ—é¥ç‚¬çˆ£
 		dc.DrawIcon(x, y, m_hIcon);
 	}
 	else
@@ -184,8 +189,8 @@ void CRemoteClientDlg::OnDestroy()
 	}
 }
 
-//µ±ÓÃ»§ÍÏ¶¯×îĞ¡»¯´°¿ÚÊ±ÏµÍ³µ÷ÓÃ´Ëº¯ÊıÈ¡µÃ¹â±ê
-//ÏÔÊ¾¡£
+//è¤°æ’¶æ•¤é´é”‹å«‹é”ã„¦æ¸¶çå¿“å¯²ç»æ¥€å½›éƒå‰éƒ´ç¼ç†»çšŸé¢ã„¦î„é‘èŠ¥æšŸé™æ §ç·±éå¤‹çˆ£
+//é„å‰§ãšéŠ†?
 HCURSOR CRemoteClientDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
@@ -194,7 +199,7 @@ HCURSOR CRemoteClientDlg::OnQueryDragIcon()
 
 void CRemoteClientDlg::OnBnClickedBtnTest()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§éºÑ‚æ¬¢é–«æ°±ç…¡æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 1981);
 
 }
@@ -202,21 +207,21 @@ void CRemoteClientDlg::OnBnClickedBtnTest()
 void CRemoteClientDlg::OnIpnFieldchangedIpaddressServ(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMIPADDRESS pIPAddr = reinterpret_cast<LPNMIPADDRESS>(pNMHDR);
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§éºÑ‚æ¬¢é–«æ°±ç…¡æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	*pResult = 0;
 	UpdateData();
 	CClientController* pController = CClientController::getInstance();
-	pController->UpdateAddress(m_server_address, atoi((LPCTSTR)m_nPort));
+	pController->UpdateAddress(m_server_address, CStringToInt(m_nPort));
 }
 
 
 void CRemoteClientDlg::OnBnClickedBtnFileinfo()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§éºÑ‚æ¬¢é–«æ°±ç…¡æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	std::list<CPacket> lstPackets;
 	int ret = CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 1, true, NULL, 0);
 	if (ret == 0) {
-		AfxMessageBox(_T("ÃüÁî´¦ÀíÊ§°Ü!!!"));
+		AfxMessageBox(_T("é›æˆ’æŠ¤æ¾¶å‹­æ‚Šæ¾¶è¾«è§¦!!!"));
 		return;
 	}
 }
@@ -244,7 +249,7 @@ void CRemoteClientDlg::DeleteTreeChildrenItem(HTREEITEM hTree)
 
 void CRemoteClientDlg::LoadFileInfo()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§éºÑ‚æ¬¢é–«æ°±ç…¡æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	
 	CPoint ptMouse;
 	GetCursorPos(&ptMouse);
@@ -274,12 +279,13 @@ void CRemoteClientDlg::UpdateFileInfo(const FILEINFO& finfo, HTREEITEM hParent)
 		if (CString(finfo.szFileName) == "." || (CString(finfo.szFileName) == ".."))
 			return;
 		TRACE("hselected %08X %08X\r\n", hParent, m_Tree.GetSelectedItem());
-		HTREEITEM hTemp = m_Tree.InsertItem(finfo.szFileName, hParent);
-		m_Tree.InsertItem("", hTemp, TVI_LAST);
-		m_Tree.Expand(hParent, TVE_EXPAND);  //½ÚµãÕ¹¿ª 
+		CString fileName(finfo.szFileName);
+		HTREEITEM hTemp = m_Tree.InsertItem(fileName, hParent);
+		m_Tree.InsertItem(_T(""), hTemp, TVI_LAST);
+		m_Tree.Expand(hParent, TVE_EXPAND);  //é‘ºå‚œå£çæ›ç´‘ 
 	}
 	else {
-		m_List.InsertItem(0, finfo.szFileName);
+		m_List.InsertItem(0, CString(finfo.szFileName));
 	}
 }
 
@@ -289,13 +295,13 @@ void CRemoteClientDlg::UpdateDownloadFile(const std::string& strData, FILE* pFil
 	TRACE("length %d index %d\r\n", length, index);
 	if (length == 0) {
 		if (strData.size() < sizeof(long long)) {
-			AfxMessageBox("ÏÂÔØÊı¾İ°üÒì³££¬ÎÄ¼ş³¤¶ÈĞÅÏ¢²»ÍêÕû¡£");
+            AfxMessageBox(_T("??????????????????"));
 			CClientController::getInstance()->DownloadEnd();
 			return;
 		}
 		length = *(long long*)strData.c_str();
 		if (length == 0) {
-			AfxMessageBox("ÎÄ¼ş³¤¶ÈÎªÁã»òÕßÎŞ·¨¶ÁÈ¡ÎÄ¼ş£¡£¡£¡");
+			AfxMessageBox(_T("é‚å›¦æ¬¢é—€å®å®³æ¶“æ´ªæµ‚é´æ ¬â‚¬å‘®æ£¤å¨‰æ›¡î‡°é™æ ¨æƒæµ è®¹ç´’é”›ä¾Šç´’"));
 			CClientController::getInstance()->DownloadEnd();
 		}
 	}
@@ -327,7 +333,7 @@ void CRemoteClientDlg::OnNMDblclkTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CRemoteClientDlg::OnNMClickTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§éºÑ‚æ¬¢é–«æ°±ç…¡æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	*pResult = 0;
 	LoadFileInfo();
 }
@@ -335,17 +341,17 @@ void CRemoteClientDlg::OnNMClickTreeDir(NMHDR* pNMHDR, LRESULT* pResult)
 void CRemoteClientDlg::OnNMRClickListFile(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§éºÑ‚æ¬¢é–«æ°±ç…¡æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	*pResult = 0;
-	CPoint ptMouse, ptList;  //»ñÈ¡Êó±êÎ»ÖÃ
+	CPoint ptMouse, ptList;  //é‘¾å³°å½‡æ¦§çŠ³çˆ£æµ£å¶‡ç–†
 	GetCursorPos(&ptMouse); 
 	ptList = ptMouse;
-	m_List.ScreenToClient(&ptList); //ÆÁÄ»×ø±ê×ª»»Îª¿Í»§Çø×ø±ê
-	int ListSelected = m_List.HitTest(ptList);  //»ñÈ¡Êó±êËùÔÚµÄĞĞ
-	if (ListSelected < 0) return;  //Èç¹ûÃ»ÓĞÑ¡ÖĞÈÎºÎĞĞÔò·µ»Ø
+	m_List.ScreenToClient(&ptList); //çå¿“ç®·é§æ„­çˆ£æî„å´²æ¶“å“„î…¹é´å³°å°¯é§æ„­çˆ£
+	int ListSelected = m_List.HitTest(ptList);  //é‘¾å³°å½‡æ¦§çŠ³çˆ£éµâ‚¬é¦ã„§æ®‘ç›?
+	if (ListSelected < 0) return;  //æ¿¡å‚›ç‰å¨Œâ„ƒæ¹é–«å¤‰è…‘æµ è®³ç¶ç›å±½å¯æ©æ–¿æ´–
 	CMenu menu;
-	menu.LoadMenuA(IDR_MENU_RCLICK);
-	CMenu* pPupup = menu.GetSubMenu(0); //»ñÈ¡µÚÒ»¸ö×Ó²Ëµ¥
+	menu.LoadMenu(IDR_MENU_RCLICK);
+	CMenu* pPupup = menu.GetSubMenu(0); //é‘¾å³°å½‡ç»—îƒ¿ç«´æ¶“î„ç“™é‘¿æ»ƒå´Ÿ
 	if(pPupup != NULL)
         pPupup->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, ptMouse.x, ptMouse.y, this);
 }
@@ -362,8 +368,8 @@ void CRemoteClientDlg::OnNMRClickListFile(NMHDR* pNMHDR, LRESULT* pResult)
 //void CRemoteClientDlg::threadDownFile()
 //{
 //
-//	int nListSelected = m_List.GetSelectionMark(); //»ñÈ¡Ñ¡ÖĞĞĞµÄË÷Òı
-//	CString strFile = m_List.GetItemText(nListSelected, 0); //»ñÈ¡Ñ¡ÖĞĞĞµÄÎÄ¼şÃû
+//	int nListSelected = m_List.GetSelectionMark(); //é‘¾å³°å½‡é–«å¤‰è…‘ç›å²€æ®‘ç»±ãˆ ç´©
+//	CString strFile = m_List.GetItemText(nListSelected, 0); //é‘¾å³°å½‡é–«å¤‰è…‘ç›å²€æ®‘é‚å›¦æ¬¢éš?
 //	CFileDialog dlg(FALSE, NULL,
 //		strFile, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
 //		NULL, this);
@@ -376,35 +382,35 @@ void CRemoteClientDlg::OnNMRClickListFile(NMHDR* pNMHDR, LRESULT* pResult)
 //		openErr = fopen_s(&pFile, (LPCSTR)dlg.GetPathName(), "wb+");
 //		#endif
 //		if (openErr != 0 || pFile == NULL) {
-//			AfxMessageBox(_T("±¾µØÃ»ÓĞÈ¨ÏŞ±£´æ¸ÃÎÄ¼ş£¬»òÕßÎÄ¼şÎŞ·¨´´½¨£¡£¡£¡"));
+//			AfxMessageBox(_T("éˆî„€æ¹´å¨Œâ„ƒæ¹é‰å†®æªºæ·‡æ¿†ç“¨ç’‡ãƒ¦æƒæµ è®¹ç´é´æ ¬â‚¬å‘®æƒæµ èˆµæ£¤å¨‰æ›å±å¯¤çŒ´ç´’é”›ä¾Šç´’"));
 //			m_dlgStatus.ShowWindow(SW_HIDE);
 //			EndWaitCursor();
 
 //			return;
 //		}
-//		HTREEITEM hSelected = m_Tree.GetSelectedItem(); //»ñÈ¡Ñ¡ÖĞÊ÷½Úµã
-//		strFile = GetPath(hSelected) + strFile; //»ñÈ¡ÎÄ¼şµÄÍêÕûÂ·¾¶
+//		HTREEITEM hSelected = m_Tree.GetSelectedItem(); //é‘¾å³°å½‡é–«å¤‰è…‘éæˆ£å¦­é?
+//		strFile = GetPath(hSelected) + strFile; //é‘¾å³°å½‡é‚å›¦æ¬¢é¨å‹«ç•¬éç£‹çŸ¾å¯°?
 //		TRACE("%s\r\n", LPCSTR(strFile));
 //		CClientSocket* pClient = CClientSocket::getInstance();
 //		do {
 //			//int ret = SendCommandPacket(4, false, (BYTE*)(LPCSTR)strFile, strFile.GetLength());
 //			int ret = CClientController::getInstance()->SendCommandPacket(4, false, (BYTE*)(LPCSTR)strFile, strFile.GetLength());
 //			if (ret < 0) {
-//				AfxMessageBox("Ö´ĞĞÏÂÔØÃüÁîÊ§°Ü£¡£¡");
-//				TRACE("Ö´ĞĞÏÂÔØÊ§°Ü£ºret = %d\r\n", ret);
+//				AfxMessageBox("éµÑ†î”‘æ¶“å¬­æµ‡é›æˆ’æŠ¤æ¾¶è¾«è§¦é”›ä¾Šç´’");
+//				TRACE("éµÑ†î”‘æ¶“å¬­æµ‡æ¾¶è¾«è§¦é”›æ­³et = %d\r\n", ret);
 //				break;
 //			}
 //			long long nLength = *(long long*)pClient->GetPacket().strData.c_str();
 //			if (nLength == 0) {
-//				AfxMessageBox("ÎÄ¼ş³¤¶ÈÎªÁã»òÕßÎŞ·¨¶ÁÈ¡ÎÄ¼ş£¡£¡£¡");
+//				AfxMessageBox("é‚å›¦æ¬¢é—€å®å®³æ¶“æ´ªæµ‚é´æ ¬â‚¬å‘®æ£¤å¨‰æ›¡î‡°é™æ ¨æƒæµ è®¹ç´’é”›ä¾Šç´’");
 //				break;
 //			}
 //			long long nCount = 0;
 //			while (nCount < nLength) {
 //				ret = pClient->DealCommand();
 //				if (ret < 0) {
-//					AfxMessageBox("´«ÊäÊ§°Ü£¡£¡");
-//					TRACE("´«ÊäÊ§°Ü£ºret = %d\r\n", ret);
+//					AfxMessageBox("æµ¼çŠºç·­æ¾¶è¾«è§¦é”›ä¾Šç´’");
+//					TRACE("æµ¼çŠºç·­æ¾¶è¾«è§¦é”›æ­³et = %d\r\n", ret);
 //					break;
 //				}
 //				fwrite(pClient->GetPacket().strData.c_str(), 1, pClient->GetPacket().strData.size(), pFile);
@@ -416,29 +422,29 @@ void CRemoteClientDlg::OnNMRClickListFile(NMHDR* pNMHDR, LRESULT* pResult)
 //	}
 //	m_dlgStatus.ShowWindow(SW_HIDE);
 //	EndWaitCursor();
-//	MessageBox(_T("ÏÂÔØÍê³É£¡£¡"), _T("Íê³É"));
+//	MessageBox(_T("æ¶“å¬­æµ‡ç€¹å±¾åšé”›ä¾Šç´’"), _T("ç€¹å±¾åš"));
 //}
 
 void CRemoteClientDlg::DealCommand(WORD nCmd, const std::string& strData, LPARAM lParam)
 {
 	switch (nCmd) {
-	case 1://»ñÈ¡Çı¶¯ĞÅÏ¢
+	case 1://é‘¾å³°å½‡æ¤¹åå§©æ·‡â„ƒä¼…
 		Str2Tree(strData, m_Tree);
 		break;
-	case 2://»ñÈ¡ÎÄ¼şĞÅÏ¢
+	case 2://é‘¾å³°å½‡é‚å›¦æ¬¢æ·‡â„ƒä¼…
 		UpdateFileInfo(*(PFILEINFO)strData.c_str(), (HTREEITEM)lParam);
 		break;
 	case 3:
-		MessageBox("´ò¿ªÎÄ¼şÍê³É£¡", "²Ù×÷Íê³É", MB_ICONINFORMATION);
+        MessageBox(_T("???????"), _T("????"), MB_ICONINFORMATION);
 		break;
 	case 4:
 		UpdateDownloadFile(strData, (FILE*)lParam);
 		break;
 	case 9:
-		MessageBox("É¾³ıÎÄ¼şÍê³É£¡", "²Ù×÷Íê³É", MB_ICONINFORMATION);
+        MessageBox(_T("???????"), _T("????"), MB_ICONINFORMATION);
 		break;
 	case 1981:
-		MessageBox("Á¬½Ó²âÊÔ³É¹¦£¡", "Á¬½Ó³É¹¦", MB_ICONINFORMATION);
+        MessageBox(_T("???????"), _T("????"), MB_ICONINFORMATION);
 		break;
 	default:
 		TRACE("unknow data received! %d\r\n", nCmd);
@@ -452,7 +458,7 @@ LRESULT CRemoteClientDlg::OnSendPackAck(WPARAM wParam, LPARAM lParam)
 		TRACE("socket is error %d\r\n", lParam);
 	}
 	else if (lParam == 1) {
-		//¶Ô·½¹Ø±ÕÁËÌ×½Ó×Ö
+		//ç€µè§„æŸŸéæŠ½æ£´æµœå——îšœéºãƒ¥ç“§
 		TRACE("socket is closed!\r\n");
 	}
 	else {
@@ -467,22 +473,23 @@ LRESULT CRemoteClientDlg::OnSendPackAck(WPARAM wParam, LPARAM lParam)
 
 void CRemoteClientDlg::InitUIData()
 {
-	//  Ö´ĞĞ´Ë²Ù×÷
-	SetIcon(m_hIcon, TRUE);			// ÉèÖÃ´óÍ¼±ê
-	SetIcon(m_hIcon, FALSE);		// ÉèÖÃĞ¡Í¼±ê
+	//  éµÑ†î”‘å§ã‚†æ·æµ£?
+	SetIcon(m_hIcon, TRUE);			// ç’å‰§ç–†æ¾¶Ñƒæµ˜é?
+	SetIcon(m_hIcon, FALSE);		// ç’å‰§ç–†çå¿“æµ˜é?
 
-	// TODO: ÔÚ´ËÌí¼Ó¶îÍâµÄ³õÊ¼»¯´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§æ£°æ¿†î˜»é¨å‹«åµæ¿®å¬ªå¯²æµ ï½‡çˆœ
 	UpdateData();
 	/*m_server_address = MAKEIPADDRESS(172, 20, 10, 3);*/
-	m_server_address = MAKEIPADDRESS(192, 168, 43, 250);
+	/*m_server_address = MAKEIPADDRESS(192, 168, 43, 250);*/
+	m_server_address = MAKEIPADDRESS(127, 0, 0, 1);
 	m_nPort = _T("9527");
 	CClientController* pController = CClientController::getInstance();
-	pController->UpdateAddress(m_server_address, atoi((LPCTSTR)m_nPort));
+	pController->UpdateAddress(m_server_address, CStringToInt(m_nPort));
 
 	UpdateData(FALSE);
 
-	m_dlgStatus.Create(IDD_DLG_STATUS, this); // ´´½¨×´Ì¬¶Ô»°¿ò
-	m_dlgStatus.ShowWindow(SW_HIDE); // ÏÔÊ¾×´Ì¬¶Ô»°¿ò
+	m_dlgStatus.Create(IDD_DLG_STATUS, this); // é’æ¶˜ç¼“é˜èˆµâ‚¬ä½¸î‡®ç’‡æ¿‡î”‹
+	m_dlgStatus.ShowWindow(SW_HIDE); // é„å‰§ãšé˜èˆµâ‚¬ä½¸î‡®ç’‡æ¿‡î”‹
 }
 
 void CRemoteClientDlg::LoadFileCurrent()
@@ -498,7 +505,7 @@ void CRemoteClientDlg::LoadFileCurrent()
 	while (pInfo->HasNext) {
 		TRACE("[%s] isdir %d\r\n", pInfo->szFileName, pInfo->IsDirectory);
 		if (!pInfo->IsDirectory) {
-			m_List.InsertItem(0, pInfo->szFileName);
+			m_List.InsertItem(0, CString(pInfo->szFileName));
 		}
 		int cmd = pClient->DealCommand();
 		TRACE("ack:%d\r\n", cmd);
@@ -516,8 +523,8 @@ void CRemoteClientDlg::Str2Tree(const std::string& drivers, CTreeCtrl& tree)
 	{
 		if (drivers[i] == ',') {
 			dr += ":";
-			HTREEITEM hTemp = tree.InsertItem(dr.c_str(), TVI_ROOT, TVI_LAST);
-			tree.InsertItem("", hTemp, TVI_LAST);
+			HTREEITEM hTemp = tree.InsertItem(CString(dr.c_str()), TVI_ROOT, TVI_LAST);
+			tree.InsertItem(_T(""), hTemp, TVI_LAST);
 			dr.clear();
 			continue;
 		}
@@ -525,23 +532,23 @@ void CRemoteClientDlg::Str2Tree(const std::string& drivers, CTreeCtrl& tree)
 	}
 	if (dr.size() > 0) {
 		dr += ":";
-		HTREEITEM hTemp = tree.InsertItem(dr.c_str(), TVI_ROOT, TVI_LAST);
-		tree.InsertItem("", hTemp, TVI_LAST);
+		HTREEITEM hTemp = tree.InsertItem(CString(dr.c_str()), TVI_ROOT, TVI_LAST);
+		tree.InsertItem(_T(""), hTemp, TVI_LAST);
 	}
 }
 
 void CRemoteClientDlg::OnDownloadFile()
 {
-	// TODO: ÔÚ´ËÌí¼ÓÃüÁî´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§é›æˆ’æŠ¤æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 
-	int nListSelected = m_List.GetSelectionMark(); //»ñÈ¡Ñ¡ÖĞĞĞµÄË÷Òı
-	CString strFile = m_List.GetItemText(nListSelected, 0); //»ñÈ¡Ñ¡ÖĞĞĞµÄÎÄ¼şÃû
+	int nListSelected = m_List.GetSelectionMark(); //é‘¾å³°å½‡é–«å¤‰è…‘ç›å²€æ®‘ç»±ãˆ ç´©
+	CString strFile = m_List.GetItemText(nListSelected, 0); //é‘¾å³°å½‡é–«å¤‰è…‘ç›å²€æ®‘é‚å›¦æ¬¢éš?
 
-	HTREEITEM hSelected = m_Tree.GetSelectedItem(); //»ñÈ¡Ñ¡ÖĞÊ÷½Úµã
-	strFile = GetPath(hSelected) + strFile; //»ñÈ¡ÎÄ¼şµÄÍêÕûÂ·¾¶
+	HTREEITEM hSelected = m_Tree.GetSelectedItem(); //é‘¾å³°å½‡é–«å¤‰è…‘éæˆ£å¦­é?
+	strFile = GetPath(hSelected) + strFile; //é‘¾å³°å½‡é‚å›¦æ¬¢é¨å‹«ç•¬éç£‹çŸ¾å¯°?
 	int ret = CClientController::getInstance()->DownFile(strFile);
 	if(ret != 0) {
-		AfxMessageBox("ÏÂÔØÎÄ¼şÊ§°Ü£¡£¡£¡");
+        AfxMessageBox(_T("?????????"));
 	}
 	
 }
@@ -549,7 +556,7 @@ void CRemoteClientDlg::OnDownloadFile()
 
 void CRemoteClientDlg::OnDeleteFile()
 {
-	// TODO: ÔÚ´ËÌí¼ÓÃüÁî´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§é›æˆ’æŠ¤æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	HTREEITEM hSelected = m_Tree.GetSelectedItem();
 	CString strPath = GetPath(hSelected);
 	int nSelected = m_List.GetSelectionMark();
@@ -559,7 +566,7 @@ void CRemoteClientDlg::OnDeleteFile()
 	int ret = CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 9, true,
 		(BYTE*)(LPCSTR)fileA, fileA.GetLength());
 	if (ret < 0) {
-		AfxMessageBox("É¾³ıÎÄ¼şÃüÁîÖ´ĞĞÊ§°Ü£¡£¡£¡");
+        AfxMessageBox(_T("?????????????"));
 	}
 	LoadFileCurrent();
 
@@ -567,7 +574,7 @@ void CRemoteClientDlg::OnDeleteFile()
 
 void CRemoteClientDlg::OnOpenFile()
 {
-	// TODO: ÔÚ´ËÌí¼ÓÃüÁî´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§é›æˆ’æŠ¤æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	HTREEITEM hSelected = m_Tree.GetSelectedItem();
 	CString strPath = GetPath(hSelected);
 	int nSelected = m_List.GetSelectionMark();
@@ -577,7 +584,7 @@ void CRemoteClientDlg::OnOpenFile()
 	int ret = CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 3, true,
 		(BYTE*)(LPCSTR)fileA, fileA.GetLength());
 	if (ret < 0) {
-		AfxMessageBox("´ò¿ªÎÄ¼şÃüÁîÖ´ĞĞÊ§°Ü£¡£¡£¡");
+        AfxMessageBox(_T("?????????????"));
 	}
 }
 
@@ -585,14 +592,14 @@ void CRemoteClientDlg::OnOpenFile()
 
 void CRemoteClientDlg::OnBnClickedBtnStartWatch() 
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO: é¦ã„¦î„å¨£è¯²å§éºÑ‚æ¬¢é–«æ°±ç…¡æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	CClientController::getInstance()->StartWatchScreen();
 }
 
 
 void CRemoteClientDlg::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: é¦ã„¦î„å¨£è¯²å§å¨‘å Ÿä¼…æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœéœ?é´æ ¬çšŸé¢ã„©ç²¯ç’ã‚…â‚¬?
 	
 	CDialogEx::OnTimer(nIDEvent);
 }
@@ -601,13 +608,13 @@ void CRemoteClientDlg::OnTimer(UINT_PTR nIDEvent)
 
 void CRemoteClientDlg::OnEnChangeEditPort()
 {
-	// TODO:  Èç¹û¸Ã¿Ø¼şÊÇ RICHEDIT ¿Ø¼ş£¬Ëü½«²»
-	// ·¢ËÍ´ËÍ¨Öª£¬³ı·ÇÖØĞ´ CDialogEx::OnInitDialog()
-	// º¯Êı²¢µ÷ÓÃ CRichEditCtrl().SetEventMask()£¬
-	// Í¬Ê±½« ENM_CHANGE ±êÖ¾¡°»ò¡±ÔËËãµ½ÑÚÂëÖĞ¡£
+	// TODO:  æ¿¡å‚›ç‰ç’‡ãƒ¦å¸¶æµ èˆµæ§¸ RICHEDIT éºÑ‚æ¬¢é”›å±½ç• çå—•ç¬‰
+	// é™æˆ¦â‚¬ä½¹î„é–«æ°±ç…¡é”›å²„æ«é—ˆç‚ºå™¸é?CDialogEx::OnInitDialog()
+	// é‘èŠ¥æšŸéªæƒ°çšŸé¢?CRichEditCtrl().SetEventMask()é”›?
+	// éšå±¾æ¤‚ç?ENM_CHANGE éå›§ç¹”éˆ¥æ»„å¨éˆ¥æ¿Šç¹ç» æ¥€åŸŒéºâ•ƒçˆœæ¶“î…œâ‚¬?
 
-	// TODO:  ÔÚ´ËÌí¼Ó¿Ø¼şÍ¨Öª´¦Àí³ÌĞò´úÂë
+	// TODO:  é¦ã„¦î„å¨£è¯²å§éºÑ‚æ¬¢é–«æ°±ç…¡æ¾¶å‹­æ‚Šç»‹å¬ªç°­æµ ï½‡çˆœ
 	UpdateData();
 	CClientController* pController = CClientController::getInstance();
-	pController->UpdateAddress(m_server_address, atoi((LPCTSTR)m_nPort));
+	pController->UpdateAddress(m_server_address, CStringToInt(m_nPort));
 }
