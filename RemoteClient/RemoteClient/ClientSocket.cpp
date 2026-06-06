@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "ClientSocket.h"
 #include <Ws2tcpip.h>
 #include <vector>
@@ -26,9 +26,9 @@ std::string GetErrInfo(int wsaErrCode) {
     return ret;
 }
 
-void Dump(BYTE* pData, size_t nSize) {
+void Dump(BYTE* pData, size_t nSize) { //璋冭瘯杈撳嚭鍗佸叚杩涘埗鏁版嵁
     std::string strOut;
-    for (size_t i = 0; i < nSize; i++) {
+    for (size_t i = 0; i < nSize; i++) { //姣?6涓瓧鑺傛崲琛?
         char buf[8] = "";
         if (i > 0 && (i % 16 == 0)) strOut += "\n";
         snprintf(buf, sizeof(buf), "%02X ", pData[i] & 0xFF);
@@ -61,7 +61,7 @@ CClientSocket::CClientSocket() :
     }
     m_eventInvoke = CreateEvent(NULL, TRUE, FALSE, NULL);
     m_hThread = (HANDLE)_beginthreadex(NULL, 0, &CClientSocket::threadEntry, this, 0, &m_nThreadID);
-    // 修复C6387警告，确保m_eventInvoke不为NULL再调用WaitForSingleObject
+    
     if (m_eventInvoke != NULL && WaitForSingleObject(m_eventInvoke, 100) == WAIT_TIMEOUT) {
         TRACE("网络消息处理线程启动失败了！\r\n");
     }
@@ -77,7 +77,7 @@ CClientSocket::CClientSocket() :
     };
     for (int i = 0; funcs[i].message != 0; i++) {
         if (m_mapFunc.insert(std::pair<UINT, MSGFUNC>(funcs[i].message, funcs[i].func)).second == false) {
-            TRACE("插入失败，消息值：%d 函数�?%08X 序号:%d\r\n", funcs[i].message, funcs[i].func, i);
+            TRACE("插入失败，消息值：%d 函数值:%08X 序号:%d\r\n", funcs[i].message, funcs[i].func, i);
         }
     }
 }
@@ -99,8 +99,8 @@ bool CClientSocket::InitSocket() {
     }
     int ret = connect(m_sock, (sockaddr*)&serv_adr, sizeof(serv_adr));
     if (ret == -1) {
-        AfxMessageBox(_T("连接失败!"));
-        TRACE("连接失败�?d %s\r\n", WSAGetLastError(), GetErrInfo(WSAGetLastError()).c_str());
+        AfxMessageBox(_T("连接失败！"));
+        TRACE("连接失败：%d %s\r\n", WSAGetLastError(), GetErrInfo(WSAGetLastError()).c_str());
         return false;
     }
     TRACE("socket init done!\r\n");
@@ -115,7 +115,7 @@ int CClientSocket::DealCommand() {
     //char buffer[1024];
     char* buffer = m_buffer.data();
 
-    static size_t index = 0;
+	static size_t index = 0; //记录当前缓冲区中已经存储了多少数据
     while (true) {
         size_t len = recv(m_sock, buffer + index, BUFFER_SIZE - index, 0);
         if (((int)len <= 0) && ((int)index <= 0)) {
@@ -153,7 +153,7 @@ void CClientSocket::SendPack(UINT nMsg, WPARAM wParam, LPARAM lParam)
     if (InitSocket() == true) {
         int ret = send(m_sock, (char*)data.strData.c_str(), (int)data.strData.size(), 0);
         if (ret > 0) {
-            size_t index = 0;
+			size_t index = 0; //记录当前缓冲区中已经存储了多少数据
             std::string strBuffer;
             strBuffer.resize(BUFFER_SIZE);
             char* pBuffer = (char*)strBuffer.c_str();
@@ -175,7 +175,7 @@ void CClientSocket::SendPack(UINT nMsg, WPARAM wParam, LPARAM lParam)
                         memmove(pBuffer, pBuffer + nLen, index);
                     }
                 }
-                else {//TODO：对方关闭了套接字，或者网络设备异�?
+                else {//recv 错误或者连接关闭
                     TRACE("recv failed length %d index %d cmd %d\r\n", length, index, current.sCmd);
                     CloseSocket();
                     if (length < 0) {
@@ -187,7 +187,7 @@ void CClientSocket::SendPack(UINT nMsg, WPARAM wParam, LPARAM lParam)
         }
         else {
             CloseSocket();
-            //网络终止处理
+            // 发送失败了，可能是连接断了，通知界面
             ::SendMessage(hWnd, WM_SEND_PACK_ACK, NULL, -1);
         }
     }
@@ -248,7 +248,7 @@ unsigned CClientSocket::threadEntry(void* arg)
 //            CPacket& head = m_lstSend.front();
 //            m_lock.unlock();
 //            if (Send(head) == false) {
-//                TRACE("发送失败！\r\n");
+//                TRACE("鍙戦€佸け璐ワ紒\r\n");
 //                continue;
 //            }
 //            std::map<HANDLE, std::list<CPacket>&>::iterator it;
@@ -262,7 +262,7 @@ unsigned CClientSocket::threadEntry(void* arg)
 //                        index += length;
 //                        size_t size = (size_t)index;
 //                        CPacket pack((BYTE*)pBuffer, size);
-//                        if (size > 0) {//TODO:对于文件夹信息获取，文件信息获取可能产生问题
+//                        if (size > 0) {//TODO:瀵逛簬鏂囦欢澶逛俊鎭幏鍙栵紝鏂囦欢淇℃伅鑾峰彇鍙兘浜х敓闂
 //                            pack.hEvent = head.hEvent;
 //                            it->second.push_back(pack);
 //                            memmove(pBuffer, pBuffer + size, index - size);
@@ -276,12 +276,12 @@ unsigned CClientSocket::threadEntry(void* arg)
 //                    }
 //                    else if (length <= 0 && index <= 0) {
 //                        CloseSocket();
-//                        SetEvent(head.hEvent);//等到服务器关闭命令之后，再通知事情完成
+//                        SetEvent(head.hEvent);//绛夊埌鏈嶅姟鍣ㄥ叧闂懡浠や箣鍚庯紝鍐嶉€氱煡浜嬫儏瀹屾垚
 //                        if (it0 != m_mapAutoClosed.end()) {
 //                            TRACE("SetEvent %d %d\r\n", head.sCmd, it0->second);
 //                        }
 //                        else {
-//                            TRACE("异常的情况，没有对应的pair\r\n");
+//                            TRACE("寮傚父鐨勬儏鍐碉紝娌℃湁瀵瑰簲鐨刾air\r\n");
 //                        }
 //                        break;
 //                    }

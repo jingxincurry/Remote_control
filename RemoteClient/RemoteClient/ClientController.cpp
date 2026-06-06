@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "ClientController.h"
 
 #include <map>
@@ -30,12 +30,12 @@ CClientController* CClientController::getInstance()
 	return m_instance;
 }
 
-// ³õÊ¼»¯²Ù×÷
+// åˆå§‹åŒ–æ“ä½œ
 int CClientController::InitController()
 {
-	// ÕâÀï¿ÉÒÔÌí¼Ó³õÊ¼»¯Âß¼­
-	// ÀıÈç£º³õÊ¼»¯Socket¡¢½çÃæ¡¢Ïß³ÌµÈ
-	// ·µ»Ø0±íÊ¾³É¹¦£¬ÆäËûÖµ±íÊ¾Ê§°Ü
+	// è¿™é‡Œå¯ä»¥æ·»åŠ åˆå§‹åŒ–é€»è¾‘
+	// ä¾‹å¦‚ï¼šåˆå§‹åŒ–Socketã€ç•Œé¢ã€çº¿ç¨‹ç­‰
+	// è¿”å›0è¡¨ç¤ºæˆåŠŸï¼Œå…¶ä»–å€¼è¡¨ç¤ºå¤±è´¥
 	m_hThread = (HANDLE)_beginthreadex(
 		NULL, 0,
 		&CClientController::threadEntry,
@@ -44,7 +44,7 @@ int CClientController::InitController()
 	return 0;
 }
 
-// Æô¶¯
+// å¯åŠ¨
 int CClientController::Invoke(CWnd*& pMainWnd)
 {
 	pMainWnd = &m_remoteDlg;
@@ -63,12 +63,12 @@ void CClientController::DownloadEnd()
 {
 	m_statusDlg.ShowWindow(SW_HIDE);
 	m_remoteDlg.EndWaitCursor();
-	m_remoteDlg.MessageBox(_T("ÏÂÔØÍê³É£¡£¡"), _T("Íê³É"));
+	m_remoteDlg.MessageBox(_T("ä¸‹è½½å®Œæˆï¼ï¼"), _T("å®Œæˆ"));
 }
 
 int CClientController::DownFile(CString strPath)
 {
-	// ´ò¿ªÎÄ¼ş±£´æ¶Ô»°¿ò£¬»ñÈ¡ÓÃ»§Ñ¡ÔñµÄ±¾µØÎÄ¼şÂ·¾¶
+	// æ‰“å¼€æ–‡ä»¶ä¿å­˜å¯¹è¯æ¡†ï¼Œè·å–ç”¨æˆ·é€‰æ‹©çš„æœ¬åœ°æ–‡ä»¶è·¯å¾„
 	CFileDialog dlg(
 		FALSE, NULL,
 		strPath, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
@@ -78,7 +78,7 @@ int CClientController::DownFile(CString strPath)
 		m_strLocal = dlg.GetPathName();
 		_beginthread(&CClientController::threadEntryForDownFile, 0, this);
 		m_remoteDlg.BeginWaitCursor();
-		m_statusDlg.m_info.SetWindowText(_T("ÃüÁîÕıÔÚÖ´ĞĞÖĞ£¡"));
+		m_statusDlg.m_info.SetWindowText(_T("å‘½ä»¤æ­£åœ¨æ‰§è¡Œä¸­ï¼"));
 		m_statusDlg.ShowWindow(SW_SHOW);
 		m_statusDlg.CenterWindow(&m_remoteDlg);
 		m_statusDlg.SetActiveWindow();
@@ -102,7 +102,7 @@ void CClientController::threadDownFile()
 	fopen_s(&pFile, m_strLocal, "wb+");
 #endif
 	if (pFile == NULL) {
-		m_remoteDlg.MessageBox(_T("±¾µØÃ»ÓĞÈ¨ÏŞ±£´æ¸ÃÎÄ¼ş£¬»òÕßÎÄ¼şÎŞ·¨´´½¨£¡£¡£¡"));
+		m_remoteDlg.MessageBox(_T("æœ¬åœ°æ²¡æœ‰æƒé™ä¿å­˜è¯¥æ–‡ä»¶ï¼Œæˆ–è€…æ–‡ä»¶æ— æ³•åˆ›å»ºï¼ï¼ï¼"));
 		m_statusDlg.ShowWindow(SW_HIDE);
 		m_remoteDlg.EndWaitCursor();
 		return;
@@ -112,8 +112,8 @@ void CClientController::threadDownFile()
 	int ret = SendCommandPacket(m_remoteDlg.GetSafeHwnd(), 4, false,
 		(BYTE*)(LPCSTR)remotePath, remotePath.GetLength(), (WPARAM)pFile);
 	if (ret < 0) {
-		m_remoteDlg.MessageBox(_T("Ö´ĞĞÏÂÔØÃüÁî·¢ËÍÊ§°Ü£¡£¡"));
-		TRACE("Ö´ĞĞÏÂÔØÊ§°Ü£ºret = %d\r\n", ret);
+		m_remoteDlg.MessageBox(_T("æ‰§è¡Œä¸‹è½½å‘½ä»¤å‘é€å¤±è´¥ï¼ï¼"));
+		TRACE("æ‰§è¡Œä¸‹è½½å¤±è´¥ï¼šret = %d\r\n", ret);
 		fclose(pFile);
 		m_statusDlg.ShowWindow(SW_HIDE);
 		m_remoteDlg.EndWaitCursor();
@@ -124,7 +124,7 @@ void CClientController::StartWatchScreen()
 {
 	m_isClosed = false;
 	m_hThreadWatch = (HANDLE)_beginthread(&CClientController::threadWatchScreen, 0, this);
-	m_watchDlg.DoModal();
+	m_watchDlg.DoModal(); // æ˜¾ç¤ºç›‘è§†çª—å£
 	m_isClosed = true;
 	WaitForSingleObject(m_hThreadWatch, 500);
 }
@@ -141,10 +141,10 @@ void CClientController::threadWatchScreen()
 			nTick = GetTickCount64();
 			int ret = SendCommandPacket(m_watchDlg.GetSafeHwnd(), 6, true, NULL, 0);
 			if (ret == 1) {
-				//TRACE("³É¹¦·¢ËÍÇëÇóÍ¼Æ¬ÃüÁî\r\n");
+				//TRACE("æˆåŠŸå‘é€è¯·æ±‚å›¾ç‰‡å‘½ä»¤\r\n");
 			}
 			else {
-				TRACE("»ñÈ¡Í¼Æ¬Ê§°Ü£¡ret = %d\r\n", ret);
+				TRACE("è·å–å›¾ç‰‡å¤±è´¥ï¼ret = %d\r\n", ret);
 			}
 		}
 		Sleep(1);
@@ -164,7 +164,7 @@ LRESULT CClientController::SendMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
 	MSGINFO msgInfo(MSG{ NULL, nMsg, wParam, lParam });
 	HANDLE hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (hEvent == NULL) {
-		return -1; // ´´½¨ÊÂ¼şÊ§°Ü
+		return -1; // åˆ›å»ºäº‹ä»¶å¤±è´¥
 	}
 	::PostThreadMessage(m_nThreadID, WM_SEND_MESSAGE, (WPARAM)&msgInfo, (LPARAM)hEvent);
 	WaitForSingleObject(hEvent, INFINITE);
@@ -172,7 +172,7 @@ LRESULT CClientController::SendMessage(UINT nMsg, WPARAM wParam, LPARAM lParam)
 	return msgInfo.result;
 }
 
-void CClientController::threadFunc()
+void CClientController::threadFunc() //æ¶ˆæ¯å¾ªç¯çº¿ç¨‹
 {
 	MSG msg;
 	while (::GetMessage(&msg, NULL, 0, 0)) {
@@ -201,7 +201,7 @@ void CClientController::threadFunc()
 }
 
 
-unsigned __stdcall CClientController::threadEntry(void* arg)
+unsigned __stdcall CClientController::threadEntry(void* arg) //æ¶ˆæ¯å¾ªç¯çº¿ç¨‹å…¥å£å‡½æ•°
 {
 	CClientController* thiz = (CClientController*)arg;
 	thiz->threadFunc();

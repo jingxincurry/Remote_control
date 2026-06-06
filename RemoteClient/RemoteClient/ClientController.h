@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "ClientSocket.h"
 #include "CWatchDialog.h"
 #include "RemoteClient.h"
@@ -9,21 +9,21 @@
 #include "MirrorTool.h"
 
 
-//#define WM_SEND_DATA (WM_USER+2) //·¢ËÍÊı¾İ
-#define WM_SHOW_STATUS (WM_USER+3) //Õ¹Ê¾×´Ì¬
-#define WM_SHOW_WATCH (WM_USER+4) //Ô¶³Ì¼à¿Ø
-#define WM_SEND_MESSAGE (WM_USER+0x1000) //×Ô¶¨ÒåÏûÏ¢´¦Àí
+//#define WM_SEND_DATA (WM_USER+2) //å‘é€æ•°æ®
+#define WM_SHOW_STATUS (WM_USER+3) //å±•ç¤ºçŠ¶æ€
+#define WM_SHOW_WATCH (WM_USER+4) //è¿œç¨‹ç›‘æ§
+#define WM_SEND_MESSAGE (WM_USER+0x1000) //è‡ªå®šä¹‰æ¶ˆæ¯å¤„ç†
 
 class CClientController
 {
 public:
-	//»ñÈ¡µ¥Àı¶ÔÏó
+	//è·å–å•ä¾‹å¯¹è±¡
 	static CClientController* getInstance();
-	//³õÊ¼»¯²Ù×÷
+	//åˆå§‹åŒ–æ“ä½œ
 	int InitController();
-	//Æô¶¯
+	//å¯åŠ¨
 	int Invoke(CWnd*& pMainWnd);
-	//¸üĞÂÍøÂç·şÎñÆ÷µÄµØÖ·
+	//æ›´æ–°ç½‘ç»œæœåŠ¡å™¨çš„åœ°å€
 	void UpdateAddress(int nIP, int nPort) {
 		CClientSocket::getInstance()->UpdateAddress(nIP, nPort);
 	}
@@ -34,19 +34,19 @@ public:
 		CClientSocket::getInstance()->CloseSocket();
 	}
 
-	//1 ²é¿´´ÅÅÌ·ÖÇø
-	//2 ²é¿´Ö¸¶¨Ä¿Â¼ÏÂµÄÎÄ¼ş
-	//3 ´ò¿ªÎÄ¼ş
-	//4 ÏÂÔØÎÄ¼ş
-	//9 É¾³ıÎÄ¼ş
-	//5 Êó±ê²Ù×÷
-	//6 ·¢ËÍÆÁÄ»ÄÚÈİ
-	//7 Ëø»ú
-	//8 ½âËø
-	//1981 ²âÊÔÁ¬½Ó
-	//·µ»ØÖµ£ºÊÇ×´Ì¬£¬trueÊÇ³É¹¦ falseÊÇÊ§°Ü
+	//1 æŸ¥çœ‹ç£ç›˜åˆ†åŒº
+	//2 æŸ¥çœ‹æŒ‡å®šç›®å½•ä¸‹çš„æ–‡ä»¶
+	//3 æ‰“å¼€æ–‡ä»¶
+	//4 ä¸‹è½½æ–‡ä»¶
+	//9 åˆ é™¤æ–‡ä»¶
+	//5 é¼ æ ‡æ“ä½œ
+	//6 å‘é€å±å¹•å†…å®¹
+	//7 é”æœº
+	//8 è§£é”
+	//1981 æµ‹è¯•è¿æ¥
+	//è¿”å›å€¼ï¼šæ˜¯çŠ¶æ€ï¼Œtrueæ˜¯æˆåŠŸ falseæ˜¯å¤±è´¥
 	bool SendCommandPacket(
-		HWND hWnd,//Êı¾İ°üÊÜµ½ºó£¬ĞèÒªÓ¦´ğµÄ´°¿Ú
+		HWND hWnd,//æ•°æ®åŒ…å—åˆ°åï¼Œéœ€è¦åº”ç­”çš„çª—å£
 		int nCmd,
 		bool bAutoClose = true,
 		BYTE* pData = NULL,
@@ -89,7 +89,7 @@ protected:
 			m_instance = NULL;
 		}
 	}
-	//·¢ËÍÏûÏ¢
+	//å‘é€æ¶ˆæ¯
 	LRESULT SendMessage(UINT nMsg, WPARAM wParam, LPARAM lParam);
 
 	LRESULT OnShowStatus(UINT nMsg, WPARAM wParam, LPARAM lParam);
@@ -125,11 +125,11 @@ private:
 	HANDLE m_hThread;
 	unsigned m_nThreadID;
 	HANDLE m_hThreadWatch;
-	bool m_isClosed;//¼àÊÓÊÇ·ñ¹Ø±Õ
+	bool m_isClosed;//ç›‘è§†æ˜¯å¦å…³é—­
 
-	//ÏÂÔØÎÄ¼şµÄÔ¶³ÌÂ·¾¶
+	//ä¸‹è½½æ–‡ä»¶çš„è¿œç¨‹è·¯å¾„
 	CString m_strRemote;
-	//ÏÂÔØÎÄ¼şµÄ±¾µØ±£´æÂ·¾¶
+	//ä¸‹è½½æ–‡ä»¶çš„æœ¬åœ°ä¿å­˜è·¯å¾„
 	CString m_strLocal;
 
 	static CClientController* m_instance;

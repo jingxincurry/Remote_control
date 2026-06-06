@@ -1,4 +1,4 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "ServerSocket.h"
 #include "MirrorTool.h"
 
@@ -13,7 +13,7 @@ CServerSocket* pserver = CServerSocket::getInstance();
 bool CServerSocket::InitSocket(short port) {
     
     if (m_sock == -1) return false;
-     //2.°ó¶¨µØÖ·
+     //2.ç»‘å®šåœ°å€
     sockaddr_in serv_adr;
     memset(&serv_adr, 0, sizeof(serv_adr));
 
@@ -31,8 +31,8 @@ bool CServerSocket::InitSocket(short port) {
 	
     return true;
 }
-int CServerSocket::Run(SOCK_CALLBACK callback, void* arg, short port = 9527) {
-	// socket¡¢bind¡¢listen¡¢accept¡¢recv¡¢send¡¢close
+int CServerSocket::Run(SOCK_CALLBACK callback, void* arg, short port) {
+	// socketã€bindã€listenã€acceptã€recvã€sendã€close
 	bool ret = InitSocket(port);
     if(ret == false) return -1;
 	std::list<CPacket> lstPacket;
@@ -42,7 +42,7 @@ int CServerSocket::Run(SOCK_CALLBACK callback, void* arg, short port = 9527) {
     while (true) {
         if (AcceptClient() == false) {
             if(count >= 3) {
-                //MessageBox(NULL, _T("¶à´ÎÎŞ·¨Õı³£½ÓÈëÓÃ»§£¬½áÊø³ÌĞò£¡"), _T("½ÓÈëÊ§°Ü£¡"), MB_OK | MB_ICONERROR);
+                //MessageBox(NULL, _T("å¤šæ¬¡æ— æ³•æ­£å¸¸æ¥å…¥ç”¨æˆ·ï¼Œç»“æŸç¨‹åºï¼"), _T("æ¥å…¥å¤±è´¥ï¼"), MB_OK | MB_ICONERROR);
                 return -2;
 			}
 			count++;
@@ -79,17 +79,17 @@ int CServerSocket::DealCommand() {
     memset(buffer, 0, BUFFER_SIZE);
     size_t index = 0;
     while (true) {
-        size_t len = recv(m_client, buffer + index, BUFFER_SIZE - index, 0);
+        int len = recv(m_client, buffer + index, (int)(BUFFER_SIZE - index), 0);
         if (len <= 0) {
 			delete[]buffer;
             return -1;
         }
-        index += len;
-        len = index;
-        m_packet = CPacket::CPacket((BYTE*)buffer, len);
-        if (len > 0) {
-            memmove(buffer, buffer + len, BUFFER_SIZE - len);
-            index -= len;
+        index += (size_t)len;
+        size_t packetSize = index;
+        m_packet = CPacket::CPacket((BYTE*)buffer, packetSize);
+        if (packetSize > 0) {
+            memmove(buffer, buffer + packetSize, BUFFER_SIZE - packetSize);
+            index -= packetSize;
             delete[]buffer;
             return m_packet.sCmd;
         }

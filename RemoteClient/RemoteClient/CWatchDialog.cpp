@@ -1,4 +1,4 @@
-// CWatchDialog.cpp: ÊµÏÖÎÄ¼þ
+ï»¿// CWatchDialog.cpp: å®žçŽ°æ–‡ä»¶
 //
 
 #include "pch.h"
@@ -7,7 +7,7 @@
 #include "CWatchDialog.h"
 #include "RemoteClientDlg.h"
 #include "ClientController.h"
-// CWatchDialog ¶Ô»°¿ò
+// CWatchDialog å¯¹è¯æ¡†
 
 IMPLEMENT_DYNAMIC(CWatchDialog, CDialog)
 
@@ -67,7 +67,7 @@ CPoint CWatchDialog::UserPoint2RemoteScreenPoint(CPoint& point, bool isScreen)
 	return CPoint(point.x * m_nObjWidth / clientRect.Width(), point.y * m_nObjHeight / clientRect.Height());
 }
 
-// CWatchDialog ÏûÏ¢´¦Àí³ÌÐò
+// CWatchDialog æ¶ˆæ¯å¤„ç†ç¨‹åº
 
 
 bool CWatchDialog::UpdateImage(const std::string& imageData)
@@ -89,7 +89,7 @@ BOOL CWatchDialog::OnInitDialog()
 
 void CWatchDialog::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌÐò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	/*if (nIDEvent == 0) {
 		CClientController* pParent = CClientController::getInstance();
 		if (m_isFull) {
@@ -101,7 +101,7 @@ void CWatchDialog::OnTimer(UINT_PTR nIDEvent)
 			m_image.StretchBlt(
 				m_picture.GetDC()->GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), SRCCOPY);
 			m_picture.InvalidateRect(NULL);
-			TRACE("¸üÐÂÍ¼Æ¬Íê³É%d %d %08X\r\n", m_nObjWidth, m_nObjHeight, (HBITMAP)m_image);
+			TRACE("æ›´æ–°å›¾ç‰‡å®Œæˆ%d %d %08X\r\n", m_nObjWidth, m_nObjHeight, (HBITMAP)m_image);
 			m_image.Destroy();
 			m_isFull = false;
 		}
@@ -111,16 +111,16 @@ void CWatchDialog::OnTimer(UINT_PTR nIDEvent)
 
 void CWatchDialog::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌÐò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	if (m_nObjWidth != -1 && m_nObjHeight != -1) 
 	{
-		//×ø±ê×ª»»
+		//åæ ‡è½¬æ¢
 		CPoint remote = UserPoint2RemoteScreenPoint(point);
-		//·â×°
+		//å°è£…
 		MOUSEEV event;
 		event.ptXY = remote;
-		event.nButton = 0;//×ó¼ü
-		event.nAction = 2;//Ë«»÷
+		event.nButton = 0;//å·¦é”®
+		event.nAction = 2;//åŒå‡»
 		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnLButtonDblClk(nFlags, point);
@@ -128,16 +128,16 @@ void CWatchDialog::OnLButtonDblClk(UINT nFlags, CPoint point)
 
 void CWatchDialog::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌÐò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	if ((m_nObjWidth != -1) && (m_nObjHeight != -1)) {
 		TRACE("x=%d y=%d\r\n", point.x, point.y);
 		CPoint remote = UserPoint2RemoteScreenPoint(point);
 		TRACE("x=%d y=%d\r\n", point.x, point.y);
-		//·â×°
+		//å°è£…
 		MOUSEEV event;
 		event.ptXY = remote;
-		event.nButton = 0;//×ó¼ü
-		event.nAction = 2;//°´ÏÂ
+		event.nButton = 0;//å·¦é”®
+		event.nAction = 2;//æŒ‰ä¸‹
 		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnLButtonDown(nFlags, point);
@@ -145,15 +145,15 @@ void CWatchDialog::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CWatchDialog::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌÐò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	if ((m_nObjWidth != -1) && (m_nObjHeight != -1)) {
-		//×ø±ê×ª»»
+		//åæ ‡è½¬æ¢
 		CPoint remote = UserPoint2RemoteScreenPoint(point);
-		//·â×°
+		//å°è£…
 		MOUSEEV event;
 		event.ptXY = remote;
-		event.nButton = 0;//×ó¼ü
-		event.nAction = 3;//µ¯Æð
+		event.nButton = 0;//å·¦é”®
+		event.nAction = 3;//å¼¹èµ·
 		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnLButtonUp(nFlags, point);
@@ -161,15 +161,15 @@ void CWatchDialog::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CWatchDialog::OnRButtonDblClk(UINT nFlags, CPoint point)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌÐò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	if ((m_nObjWidth != -1) && (m_nObjHeight != -1)) {
-		//×ø±ê×ª»»
+		//åæ ‡è½¬æ¢
 		CPoint remote = UserPoint2RemoteScreenPoint(point);
-		//·â×°
+		//å°è£…
 		MOUSEEV event;
 		event.ptXY = remote;
-		event.nButton = 1;//ÓÒ¼ü
-		event.nAction = 1;//Ë«»÷
+		event.nButton = 1;//å³é”®
+		event.nAction = 1;//åŒå‡»
 		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnRButtonDblClk(nFlags, point);
@@ -177,15 +177,15 @@ void CWatchDialog::OnRButtonDblClk(UINT nFlags, CPoint point)
 
 void CWatchDialog::OnRButtonDown(UINT nFlags, CPoint point)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌÐò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	if ((m_nObjWidth != -1) && (m_nObjHeight != -1)) {
-		//×ø±ê×ª»»
+		//åæ ‡è½¬æ¢
 		CPoint remote = UserPoint2RemoteScreenPoint(point);
-		//·â×°
+		//å°è£…
 		MOUSEEV event;
 		event.ptXY = remote;
-		event.nButton = 1;//ÓÒ¼ü
-		event.nAction = 2;//°´ÏÂ //TODO:·þÎñ¶ËÒª×ö¶ÔÓ¦µÄÐÞ¸Ä
+		event.nButton = 1;//å³é”®
+		event.nAction = 2;//æŒ‰ä¸‹ //TODO:æœåŠ¡ç«¯è¦åšå¯¹åº”çš„ä¿®æ”¹
 		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnRButtonDown(nFlags, point);
@@ -193,15 +193,15 @@ void CWatchDialog::OnRButtonDown(UINT nFlags, CPoint point)
 
 void CWatchDialog::OnRButtonUp(UINT nFlags, CPoint point)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌÐò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	if ((m_nObjWidth != -1) && (m_nObjHeight != -1)) {
-		//×ø±ê×ª»»
+		//åæ ‡è½¬æ¢
 		CPoint remote = UserPoint2RemoteScreenPoint(point);
-		//·â×°
+		//å°è£…
 		MOUSEEV event;
 		event.ptXY = remote;
-		event.nButton = 1;//ÓÒ¼ü
-		event.nAction = 3;//µ¯Æð
+		event.nButton = 1;//å³é”®
+		event.nAction = 3;//å¼¹èµ·
 		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 	CDialog::OnRButtonUp(nFlags, point);
@@ -215,8 +215,8 @@ void CWatchDialog::OnMouseMove(UINT nFlags, CPoint point)
 			CPoint remote = UserPoint2RemoteScreenPoint(point);
 			MOUSEEV event;
 			event.ptXY = remote;
-			event.nButton = 8;//Ã»ÓÐ°´¼ü
-			event.nAction = 0;//ÒÆ¶¯
+			event.nButton = 8;//æ²¡æœ‰æŒ‰é”®
+			event.nAction = 0;//ç§»åŠ¨
 			if (CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event)) != 0) {
 				m_lastMouseSendTick = now;
 				m_lastMousePoint = point;
@@ -228,17 +228,17 @@ void CWatchDialog::OnMouseMove(UINT nFlags, CPoint point)
 
 void CWatchDialog::OnStnClickedWatch()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: åœ¨æ­¤æ·»åŠ æŽ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	if ((m_nObjWidth != -1) && (m_nObjHeight != -1)) {
 		CPoint point;
 		GetCursorPos(&point);
-		//×ø±ê×ª»»
+		//åæ ‡è½¬æ¢
 		CPoint remote = UserPoint2RemoteScreenPoint(point, true);
-		//·â×°
+		//å°è£…
 		MOUSEEV event;
 		event.ptXY = remote;
-		event.nButton = 0;//×ó¼ü
-		event.nAction = 0;//µ¥»÷
+		event.nButton = 0;//å·¦é”®
+		event.nAction = 0;//å•å‡»
 		CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 5, true, (BYTE*)&event, sizeof(event));
 	}
 }
@@ -246,10 +246,10 @@ void CWatchDialog::OnStnClickedWatch()
 LRESULT CWatchDialog::OnSendPackAck(WPARAM wParam, LPARAM lParam)
 {
 	if (lParam == -1 || (lParam == -2)) {
-		//TODO:´íÎó´¦Àí
+		//TODO:é”™è¯¯å¤„ç†
 	}
 	else if (lParam == 1) {
-		//¶Ô·½¹Ø±ÕÁËÌ×½Ó×Ö
+		//å¯¹æ–¹å…³é—­äº†å¥—æŽ¥å­—
 	}
 	else {
 		CPacket* pPacket = (CPacket*)wParam;
@@ -267,12 +267,12 @@ LRESULT CWatchDialog::OnSendPackAck(WPARAM wParam, LPARAM lParam)
 				m_image.StretchBlt(
 					m_picture.GetDC()->GetSafeHdc(), 0, 0, rect.Width(), rect.Height(), SRCCOPY);
 				m_picture.InvalidateRect(NULL);
-				TRACE("¸üÐÂÍ¼Æ¬Íê³É%d %d %08X\r\n", m_nObjWidth, m_nObjHeight, (HBITMAP)m_image);
+				TRACE("æ›´æ–°å›¾ç‰‡å®Œæˆ%d %d %08X\r\n", m_nObjWidth, m_nObjHeight, (HBITMAP)m_image);
 				m_image.Destroy();
 				break;
 			}
 			case 5:
-				TRACE("Ô¶³Ì¶ËÓ¦´ðÁËÊó±ê²Ù×÷\r\n");
+				TRACE("è¿œç¨‹ç«¯åº”ç­”äº†é¼ æ ‡æ“ä½œ\r\n");
 				break;
 			case 7:
 			case 8:
@@ -288,12 +288,12 @@ LRESULT CWatchDialog::OnSendPackAck(WPARAM wParam, LPARAM lParam)
 
 void CWatchDialog::OnBnClickedBtnLock()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: åœ¨æ­¤æ·»åŠ æŽ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 7);
 }
 
 void CWatchDialog::OnBnClickedBtnUnlock()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: åœ¨æ­¤æ·»åŠ æŽ§ä»¶é€šçŸ¥å¤„ç†ç¨‹åºä»£ç 
 	CClientController::getInstance()->SendCommandPacket(GetSafeHwnd(), 8);
 }

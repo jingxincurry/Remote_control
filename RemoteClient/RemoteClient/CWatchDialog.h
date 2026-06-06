@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 #include "afxdialogex.h"
 #include "ClientSocket.h"
 #ifndef WM_SEND_PACK_ACK
-#define WM_SEND_PACK_ACK (WM_USER+2) //·¢ËÍ°üÊı¾İÓ¦´ğ
+#define WM_SEND_PACK_ACK (WM_USER+2) //å‘é€åŒ…æ•°æ®åº”ç­”
 #endif
 
-// CWatchDialog ¶Ô»°¿ò
+// CWatchDialog å¯¹è¯æ¡†
 
 class CWatchDialog : public CDialog
 {
@@ -13,11 +13,11 @@ class CWatchDialog : public CDialog
 
 public:
 
-	CWatchDialog(CWnd* pParent = nullptr);   // ±ê×¼¹¹Ôìº¯Êı
+	CWatchDialog(CWnd* pParent = nullptr);   // æ ‡å‡†æ„é€ å‡½æ•°
 	virtual ~CWatchDialog();
 
 
-// ¶Ô»°¿òÊı¾İ
+// å¯¹è¯æ¡†æ•°æ®
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_DLG_WATCH };
 #endif
@@ -28,8 +28,8 @@ public:
 	int m_nObjHeight;
 	CImage m_image;
 protected:
-	bool m_isFull;//»º´æÊÇ·ñÓĞÊı¾İ true±íÊ¾ÓĞ»º´æÊı¾İ false±íÊ¾Ã»ÓĞ»º´æÊı¾İ
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
+	bool m_isFull;//ç¼“å­˜æ˜¯å¦æœ‰æ•°æ® trueè¡¨ç¤ºæœ‰ç¼“å­˜æ•°æ® falseè¡¨ç¤ºæ²¡æœ‰ç¼“å­˜æ•°æ®
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV æ”¯æŒ
 	DECLARE_MESSAGE_MAP()
 public:
 	CImage& GetImage() {

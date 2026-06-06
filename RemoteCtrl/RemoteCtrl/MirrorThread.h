@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "pch.h"
 #include <atomic>
 #include <vector>
@@ -6,19 +6,21 @@
 #include <Windows.h>
 #include <afxsmartdockingmanager.h>
 
+#pragma warning(disable:4407)
+
 class ThreadFuncBase {};
-typedef int (ThreadFuncBase::* FUNCTYPE)(); //³ÉÔ±º¯ÊıÖ¸Õë£¬Ö¸ÏòThreadFuncBaseÀàµÄ³ÉÔ±º¯Êı£¬·µ»ØÖµÎªint£¬²ÎÊıÁĞ±íÎª¿Õ
+typedef int (ThreadFuncBase::* FUNCTYPE)(); //æˆå‘˜å‡½æ•°æŒ‡é’ˆï¼ŒæŒ‡å‘ThreadFuncBaseç±»çš„æˆå‘˜å‡½æ•°ï¼Œè¿”å›å€¼ä¸ºintï¼Œå‚æ•°åˆ—è¡¨ä¸ºç©º
 class ThreadWorker {
 public:
 	ThreadWorker():
 		thiz(nullptr),
 		func(nullptr){}
-	ThreadWorker(void* obj, FUNCTYPE f) :thiz((ThreadFuncBase*)obj), func(f) {} //¹¹Ôìº¯Êı£¬½ÓÊÜÒ»¸ö¶ÔÏóÖ¸ÕëºÍÒ»¸ö³ÉÔ±º¯ÊıÖ¸Õë£¬²¢½«ËüÃÇ·Ö±ğ¸³Öµ¸øthizºÍfunc³ÉÔ±±äÁ¿
-	ThreadWorker(const ThreadWorker& worker) { //¿½±´¹¹Ôìº¯Êı£¬½ÓÊÜÒ»¸öThreadWorker¶ÔÏó£¬²¢½«ÆäthizºÍfunc³ÉÔ±±äÁ¿·Ö±ğ¸³Öµ¸øµ±Ç°¶ÔÏóµÄthizºÍfunc³ÉÔ±±äÁ¿
+	ThreadWorker(void* obj, FUNCTYPE f) :thiz((ThreadFuncBase*)obj), func(f) {} //æ„é€ å‡½æ•°ï¼Œæ¥å—ä¸€ä¸ªå¯¹è±¡æŒ‡é’ˆå’Œä¸€ä¸ªæˆå‘˜å‡½æ•°æŒ‡é’ˆï¼Œå¹¶å°†å®ƒä»¬åˆ†åˆ«èµ‹å€¼ç»™thizå’Œfuncæˆå‘˜å˜é‡
+	ThreadWorker(const ThreadWorker& worker) { //æ‹·è´æ„é€ å‡½æ•°ï¼Œæ¥å—ä¸€ä¸ªThreadWorkerå¯¹è±¡ï¼Œå¹¶å°†å…¶thizå’Œfuncæˆå‘˜å˜é‡åˆ†åˆ«èµ‹å€¼ç»™å½“å‰å¯¹è±¡çš„thizå’Œfuncæˆå‘˜å˜é‡
 		thiz = worker.thiz;
 		func = worker.func;
 	}
-	ThreadWorker& operator=(const ThreadWorker& worker) { //¸³ÖµÔËËã·ûÖØÔØ
+	ThreadWorker& operator=(const ThreadWorker& worker) { //èµ‹å€¼è¿ç®—ç¬¦é‡è½½
 		if (this != &worker) {
 			thiz = worker.thiz; 
 			func = worker.func;
@@ -26,14 +28,14 @@ public:
 		return *this;
 	}
 
-	int operator()() { //ÖØÔØº¯Êıµ÷ÓÃÔËËã·û£¬Ê¹µÃThreadWorker¶ÔÏó¿ÉÒÔÏñº¯ÊıÒ»Ñù±»µ÷ÓÃ
+	int operator()() { //é‡è½½å‡½æ•°è°ƒç”¨è¿ç®—ç¬¦ï¼Œä½¿å¾—ThreadWorkerå¯¹è±¡å¯ä»¥åƒå‡½æ•°ä¸€æ ·è¢«è°ƒç”¨
 		if (IsValid()) {
-			return (thiz->*func)(); //µ÷ÓÃthiz¶ÔÏóµÄfunc³ÉÔ±º¯Êı£¬²¢·µ»ØÆä½á¹û
+			return (thiz->*func)(); //è°ƒç”¨thizå¯¹è±¡çš„funcæˆå‘˜å‡½æ•°ï¼Œå¹¶è¿”å›å…¶ç»“æœ
 		}
-		return -1; //»òÕßÅ×³öÒì³££¬±íÊ¾µ÷ÓÃÊ§°Ü
+		return -1; //æˆ–è€…æŠ›å‡ºå¼‚å¸¸ï¼Œè¡¨ç¤ºè°ƒç”¨å¤±è´¥
 	}
 
-	bool IsValid() const { //¼ì²éThreadWorker¶ÔÏóÊÇ·ñÓĞĞ§£¬¼´thizºÍfunc¶¼²»Îªnullptr
+	bool IsValid() const { //æ£€æŸ¥ThreadWorkerå¯¹è±¡æ˜¯å¦æœ‰æ•ˆï¼Œå³thizå’Œfuncéƒ½ä¸ä¸ºnullptr
 		return thiz != nullptr && func != nullptr;
 	}
 
@@ -53,7 +55,7 @@ public:
 		Stop();
 	}
 	bool Start() {
-		m_bStatus = true;
+		m_bStatus = true; //å°†çº¿ç¨‹çŠ¶æ€è®¾ç½®ä¸ºæ­£åœ¨è¿è¡Œ
 		m_hThread = (HANDLE)_beginthread(&MirrorThread::ThreadEntry, 0, this);
 		if (!IsValid()) {
 			m_bStatus = false;
@@ -61,7 +63,7 @@ public:
 		return m_bStatus;
 	} 
 
-	bool IsValid() {//·µ»Øtrue±íÊ¾ÓĞĞ§ ·µ»Øfalse±íÊ¾Ïß³ÌÒì³£»òÕßÒÑ¾­ÖÕÖ¹
+	bool IsValid() {//è¿”å›trueè¡¨ç¤ºæœ‰æ•ˆ è¿”å›falseè¡¨ç¤ºçº¿ç¨‹å¼‚å¸¸æˆ–è€…å·²ç»ç»ˆæ­¢
 		if (m_hThread == NULL || (m_hThread == INVALID_HANDLE_VALUE))return false;
 		return WaitForSingleObject(m_hThread, 0) == WAIT_TIMEOUT;
 	}
@@ -69,24 +71,25 @@ public:
 	bool Stop() {
 		if (m_bStatus == false) return true;
 		m_bStatus = false;
-		bool ret = TerminateThread(m_hThread, 0) != 0; //Ç¿ÖÆÖÕÖ¹Ïß³Ì£¬·µ»ØÖµÎª·ÇÁã±íÊ¾³É¹¦£¬0±íÊ¾Ê§°Ü
+		bool ret = TerminateThread(m_hThread, 0) != 0; //å¼ºåˆ¶ç»ˆæ­¢çº¿ç¨‹ï¼Œè¿”å›å€¼ä¸ºéé›¶è¡¨ç¤ºæˆåŠŸï¼Œ0è¡¨ç¤ºå¤±è´¥
 		UpdateWorker();
 		return ret;
 	}
-	void UpdateWorker(const ::ThreadWorker& worker = ::ThreadWorker()) {  //¸üĞÂÏß³Ì¹¤×÷¶ÔÏó£¬½ÓÊÜÒ»¸öThreadWorker¶ÔÏó×÷Îª²ÎÊı£¬Ä¬ÈÏÎªÒ»¸öÎŞĞ§µÄThreadWorker¶ÔÏó
-		if (m_worker.load() != NULL && m_worker.load() != &worker) { //Èç¹ûµ±Ç°Ïß³Ì¹¤×÷¶ÔÏó²»ÎªnullptrÇÒ²»µÈÓÚ´«ÈëµÄworker¶ÔÏó
-			::ThreadWorker* pWorker = m_worker.load(); //»ñÈ¡µ±Ç°Ïß³Ì¹¤×÷¶ÔÏóµÄÖ¸Õë
-			m_worker.store(NULL); //½«µ±Ç°Ïß³Ì¹¤×÷¶ÔÏó¸üĞÂÎª´«ÈëµÄworker¶ÔÏó
-			delete pWorker; //É¾³ıÔ­À´µÄÏß³Ì¹¤×÷¶ÔÏó£¬ÊÍ·ÅÄÚ´æ
+
+	void UpdateWorker(const ::ThreadWorker& worker = ::ThreadWorker()) {  //æ›´æ–°çº¿ç¨‹å·¥ä½œå¯¹è±¡ï¼Œæ¥å—ä¸€ä¸ªThreadWorkerå¯¹è±¡ä½œä¸ºå‚æ•°ï¼Œé»˜è®¤ä¸ºä¸€ä¸ªæ— æ•ˆçš„ThreadWorkerå¯¹è±¡
+		if (m_worker.load() != NULL && m_worker.load() != &worker) { //å¦‚æœå½“å‰çº¿ç¨‹å·¥ä½œå¯¹è±¡ä¸ä¸ºnullpträ¸”ä¸ç­‰äºä¼ å…¥çš„workerå¯¹è±¡
+			::ThreadWorker* pWorker = m_worker.load(); //è·å–å½“å‰çº¿ç¨‹å·¥ä½œå¯¹è±¡çš„æŒ‡é’ˆ
+			m_worker.store(NULL); //å°†å½“å‰çº¿ç¨‹å·¥ä½œå¯¹è±¡æ›´æ–°ä¸ºä¼ å…¥çš„workerå¯¹è±¡
+			delete pWorker; //åˆ é™¤åŸæ¥çš„çº¿ç¨‹å·¥ä½œå¯¹è±¡ï¼Œé‡Šæ”¾å†…å­˜
 		}
-		if (!worker.IsValid()) { //Èç¹û´«ÈëµÄworker¶ÔÏóÎŞĞ§£¬¼´thiz»òfuncÎªnullptr
-			m_worker.store(NULL); //½«µ±Ç°Ïß³Ì¹¤×÷¶ÔÏó¸üĞÂÎªnullptr
+		if (!worker.IsValid()) { //å¦‚æœä¼ å…¥çš„workerå¯¹è±¡æ— æ•ˆï¼Œå³thizæˆ–funcä¸ºnullptr
+			m_worker.store(NULL); //å°†å½“å‰çº¿ç¨‹å·¥ä½œå¯¹è±¡æ›´æ–°ä¸ºnullptr
 			return;
 		}
-		m_worker.store(new ::ThreadWorker(worker)); //½«µ±Ç°Ïß³Ì¹¤×÷¶ÔÏó¸üĞÂÎª´«ÈëµÄworker¶ÔÏóµÄÖ¸Õë£¬Ê¹ÓÃnewÔËËã·û¶¯Ì¬·ÖÅäÄÚ´æ
+		m_worker.store(new ::ThreadWorker(worker)); //å°†å½“å‰çº¿ç¨‹å·¥ä½œå¯¹è±¡æ›´æ–°ä¸ºä¼ å…¥çš„workerå¯¹è±¡çš„æŒ‡é’ˆï¼Œä½¿ç”¨newè¿ç®—ç¬¦åŠ¨æ€åˆ†é…å†…å­˜
 		
 	}
-	bool IsIdle() { //¼ì²éÏß³ÌÊÇ·ñ¿ÕÏĞ£¬¼´µ±Ç°Ïß³Ì¹¤×÷¶ÔÏóÎªnullptr
+	bool IsIdle() { //æ£€æŸ¥çº¿ç¨‹æ˜¯å¦ç©ºé—²ï¼Œå³å½“å‰çº¿ç¨‹å·¥ä½œå¯¹è±¡ä¸ºnullptr
 		if (m_worker == NULL)return true;
 		return !m_worker.load()->IsValid();
 	}
@@ -123,20 +126,20 @@ private:
 	}
 private:
 	HANDLE m_hThread;
-	bool m_bStatus; //Ïß³Ì×´Ì¬£¬true±íÊ¾ÕıÔÚÔËĞĞ£¬false±íÊ¾ÒÑÍ£Ö¹
-	std::atomic<::ThreadWorker*> m_worker; //Ïß³Ì¹¤×÷¶ÔÏó£¬Ê¹ÓÃstd::atomic±£Ö¤Ïß³Ì°²È«£¬¿ÉÒÔÔÚ¶à¸öÏß³ÌÖ®¼ä¹²ÏíºÍĞŞ¸Ä
+	bool m_bStatus; //çº¿ç¨‹çŠ¶æ€ï¼Œtrueè¡¨ç¤ºæ­£åœ¨è¿è¡Œï¼Œfalseè¡¨ç¤ºå·²åœæ­¢
+	std::atomic<::ThreadWorker*> m_worker; //çº¿ç¨‹å·¥ä½œå¯¹è±¡ï¼Œä½¿ç”¨std::atomicä¿è¯çº¿ç¨‹å®‰å…¨ï¼Œå¯ä»¥åœ¨å¤šä¸ªçº¿ç¨‹ä¹‹é—´å…±äº«å’Œä¿®æ”¹
 };
 
 
 class MirrorThreadPool {
 public:
-	MirrorThreadPool(size_t size) {
+	MirrorThreadPool(size_t size) { //æ„é€ å‡½æ•°ï¼Œæ¥å—ä¸€ä¸ªsizeå‚æ•°ï¼Œè¡¨ç¤ºçº¿ç¨‹æ± çš„å¤§å°
 		m_threads.resize(size);
 		for(int i = 0; i < size; i++) {
 			m_threads[i] = new MirrorThread();
 		}
 	}
-	MirrorThreadPool() {};
+	MirrorThreadPool() {}; //é»˜è®¤æ„é€ å‡½æ•°ï¼Œåˆ›å»ºä¸€ä¸ªç©ºçš„çº¿ç¨‹æ± 
 	~MirrorThreadPool() {
 		Stop();
 		for (size_t i = 0; i < m_threads.size(); i++)
@@ -150,8 +153,8 @@ public:
 	}
 	bool Invoke() {
 		bool ret = true;
-		for (size_t i = 0; i < m_threads.size(); i++) { //±éÀúÏß³Ì³ØÖĞµÄÃ¿¸öÏß³Ì¶ÔÏó£¬
-			//µ÷ÓÃÆäStart()·½·¨Æô¶¯Ïß³Ì£¬Èç¹ûÓĞÈÎºÎÒ»¸öÏß³ÌÆô¶¯Ê§°Ü£¬Ôò½«retÉèÖÃÎªfalse²¢Ìø³öÑ­»·
+		for (size_t i = 0; i < m_threads.size(); i++) { //éå†çº¿ç¨‹æ± ä¸­çš„æ¯ä¸ªçº¿ç¨‹å¯¹è±¡ï¼Œ
+			//è°ƒç”¨å…¶Start()æ–¹æ³•å¯åŠ¨çº¿ç¨‹ï¼Œå¦‚æœæœ‰ä»»ä½•ä¸€ä¸ªçº¿ç¨‹å¯åŠ¨å¤±è´¥ï¼Œåˆ™å°†retè®¾ç½®ä¸ºfalseå¹¶è·³å‡ºå¾ªç¯
 			if (m_threads[i]->Start() == false) {
 				ret = false;
 				break;
@@ -170,14 +173,14 @@ public:
 			m_threads[i]->Stop();
 		}
 	}
-	//·µ»Ø-1 ±íÊ¾·ÖÅäÊ§°Ü£¬ËùÓĞÏß³Ì¶¼ÔÚÃ¦ ´óÓÚµÈÓÚ0£¬±íÊ¾µÚn¸öÏß³Ì·ÖÅäÀ´×öÕâ¸öÊÂÇé
+	//è¿”å›-1 è¡¨ç¤ºåˆ†é…å¤±è´¥ï¼Œæ‰€æœ‰çº¿ç¨‹éƒ½åœ¨å¿™ å¤§äºç­‰äº0ï¼Œè¡¨ç¤ºç¬¬nä¸ªçº¿ç¨‹åˆ†é…æ¥åšè¿™ä¸ªäº‹æƒ…
 	int DispatchWorker(const ThreadWorker& worker) { 
 		int index = -1;
-		m_lock.lock();
+		m_lock.lock(); //åŠ é”ï¼Œä¿è¯çº¿ç¨‹å®‰å…¨
 		for (size_t i = 0; i < m_threads.size(); i++) {
 			if (m_threads[i] != NULL && m_threads[i]->IsIdle()) {
 				m_threads[i]->UpdateWorker(worker);
-				index = i;
+				index = static_cast<int>(i);
 				break;
 			}
 		}
@@ -191,6 +194,6 @@ public:
 		return false;
 	}
 private:
-	std::mutex m_lock;   //Ïß³Ì³ØËø£¬Ê¹ÓÃstd::mutex±£Ö¤Ïß³Ì°²È«£¬±£»¤¶ÔÏß³Ì³ØµÄ·ÃÎÊºÍĞŞ¸Ä
-	std::vector<MirrorThread*> m_threads; //Ïß³Ì³ØÖĞµÄÏß³Ì¶ÔÏó£¬Ê¹ÓÃstd::vector´æ´¢£¬¿ÉÒÔ¶¯Ì¬µ÷ÕûÏß³ÌÊıÁ¿
+	std::mutex m_lock;   //çº¿ç¨‹æ± é”ï¼Œä½¿ç”¨std::mutexä¿è¯çº¿ç¨‹å®‰å…¨ï¼Œä¿æŠ¤å¯¹çº¿ç¨‹æ± çš„è®¿é—®å’Œä¿®æ”¹
+	std::vector<MirrorThread*> m_threads; //çº¿ç¨‹æ± ä¸­çš„çº¿ç¨‹å¯¹è±¡ï¼Œä½¿ç”¨std::vectorå­˜å‚¨ï¼Œå¯ä»¥åŠ¨æ€è°ƒæ•´çº¿ç¨‹æ•°é‡
 };

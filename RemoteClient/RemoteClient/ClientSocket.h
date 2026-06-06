@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "pch.h"
 #include "framework.h"
@@ -7,8 +7,8 @@
 #include <map>
 #include <mutex>
 #include <list>
-#define WM_SEND_PACK (WM_USER+1) //·¢ËÍ°üÊı¾İ
-#define WM_SEND_PACK_ACK (WM_USER+2) //·¢ËÍ°üÊı¾İÓ¦´ğ
+#define WM_SEND_PACK (WM_USER+1) //å‘é€åŒ…æ•°æ®
+#define WM_SEND_PACK_ACK (WM_USER+2) //å‘é€åŒ…æ•°æ®åº”ç­”
 
 #pragma pack(push)
 #pragma pack(1) 
@@ -42,42 +42,52 @@ public:
 	CPacket(const BYTE* pData, size_t& nSize)
 		: sHead(0), nLength(0), sCmd(0), sSum(0) {
 		size_t i = 0;
-		//²éÕÒ°üÍ·
-		for (; i < nSize; i++) {  // i + 1 ?
-			if (*(WORD*)(pData + i) == 0xFEFF) {
-				sHead = *(WORD*)(pData + i);
+		if (pData == NULL || nSize < 2) {
+			nSize = 0;
+			return;
+		}
+		//æŸ¥æ‰¾åŒ…å¤´
+		for (; i + sizeof(WORD) <= nSize; i++) {
+			WORD head = 0;
+			memcpy(&head, pData + i, sizeof(head));
+			if (head == 0xFEFF) {
+				sHead = head;
 				i += 2;
 				break;
 			}
 		}
-		// 2. ÖÁÉÙ»¹ÒªÓĞ nLength + sCmd + sSum
-		if (i + 4 + 2 + 2 > nSize) {  //°üÊı¾İ¿ÉÄÜ²»È«£¬»òÕß°üÍ·Î´ÄÜÍêÈ«ÊÕµ½
+		if (sHead != 0xFEFF) {
 			nSize = 0;
 			return;
 		}
-		// 3. ¶ÁÈ¡³¤¶È
-		nLength = *(DWORD*)(pData + i); i += 4;
-		if (nLength + i > nSize) {  //°üÎ´ÍêÈ«ÊÕµ½£¬¾Í·µ»Ø£¬½âÎöÊ§°Ü
+		// 2. è‡³å°‘è¿˜è¦æœ‰ nLength + sCmd + sSum
+		if (i + 4 + 2 + 2 > nSize) {  //åŒ…æ•°æ®å¯èƒ½ä¸å…¨ï¼Œæˆ–è€…åŒ…å¤´æœªèƒ½å®Œå…¨æ”¶åˆ°
 			nSize = 0;
 			return;
 		}
-		// 5. ¶ÁÈ¡ÃüÁî×Ö
-		sCmd = *(WORD*)(pData + i); i += 2;
-		// 6. ¶ÁÈ¡Êı¾İÇø
+		// 3. è¯»å–é•¿åº¦
+		memcpy(&nLength, pData + i, sizeof(nLength)); i += 4;
+		if (nLength < 4 || nLength + i > nSize) {  //åŒ…æœªå®Œå…¨æ”¶åˆ°ï¼Œå°±è¿”å›ï¼Œè§£æå¤±è´¥
+			nSize = 0;
+			return;
+		}
+		// 5. è¯»å–å‘½ä»¤å­—
+		memcpy(&sCmd, pData + i, sizeof(sCmd)); i += 2;
+		// 6. è¯»å–æ•°æ®åŒº
 		if (nLength > 4) {
 			strData.resize(nLength - 2 - 2);
 			memcpy((void*)strData.c_str(), pData + i, nLength - 4);
 			i += nLength - 4;
 		}
-		//7.¶ÁÈ¡Ğ£ÑéºÍ
-		sSum = *(WORD*)(pData + i); i += 2;
+		//7.è¯»å–æ ¡éªŒå’Œ
+		memcpy(&sSum, pData + i, sizeof(sSum)); i += 2;
 
-		// 8. ¼ÆËãĞ£ÑéºÍ
+		// 8. è®¡ç®—æ ¡éªŒå’Œ
 		WORD sum = 0;
 		for (size_t j = 0; j < strData.size(); j++) {
 			sum += BYTE(strData[j]) & 0xFF;
 		}
-		// 9. Ğ£Ñé
+		// 9. æ ¡éªŒ
 		if (sum == sSum) {
 			nSize = i;  //head length data...
 			return;
@@ -111,34 +121,34 @@ public:
 		return strOut.c_str();
 	}
 public:
-	//[°üÍ· sHead] [³¤¶È nLength] [ÃüÁî sCmd] [Êı¾İ strData] [Ğ£Ñé sSum]
-	WORD sHead; //¹Ì¶¨Î» FE FF                     2
-	DWORD nLength; //°ü³¤¶È£¨´Ó¿ØÖÆÃüÁî¿ªÊ¼£¬µ½ºÍĞ£Ñé½áÊø£©     4
-	// nLength = 2 + Êı¾İ³¤¶È + 2         ËùÒÔ Êı¾İ³¤¶È = nLength - 4
-	WORD sCmd;  //¿ØÖÆÃüÁî				2
-	std::string strData; //°üÊı¾İ    ²»È·¶¨
-	WORD sSum; //ºÍĞ£Ñé            2
+	//[åŒ…å¤´ sHead] [é•¿åº¦ nLength] [å‘½ä»¤ sCmd] [æ•°æ® strData] [æ ¡éªŒ sSum]
+	WORD sHead; //å›ºå®šä½ FE FF                     2
+	DWORD nLength; //åŒ…é•¿åº¦ï¼ˆä»æ§åˆ¶å‘½ä»¤å¼€å§‹ï¼Œåˆ°å’Œæ ¡éªŒç»“æŸï¼‰     4
+	// nLength = 2 + æ•°æ®é•¿åº¦ + 2         æ‰€ä»¥ æ•°æ®é•¿åº¦ = nLength - 4
+	WORD sCmd;  //æ§åˆ¶å‘½ä»¤				2
+	std::string strData; //åŒ…æ•°æ®    ä¸ç¡®å®š
+	WORD sSum; //å’Œæ ¡éªŒ            2
 	std::string strOut;
 
-	//HANDLE hEvent; //µÈ´ıÓ¦´ğµÄÊÂ¼ş
+	//HANDLE hEvent; //ç­‰å¾…åº”ç­”çš„äº‹ä»¶
 };
 #pragma pack(pop)
 
 typedef struct MouseEvent {
-	//nButton£º0±íÊ¾×ó¼ü£¬1±íÊ¾ÓÒ¼ü£¬2±íÊ¾ÖĞ¼ü£¬4Ã»ÓĞ°´¼ü
-	//nAction: 0±íÊ¾µ¥»÷£¬1±íÊ¾Ë«»÷£¬2±íÊ¾°´ÏÂ£¬3±íÊ¾·Å¿ª£¬4²»×÷´¦Àí
+	//nButtonï¼š0è¡¨ç¤ºå·¦é”®ï¼Œ1è¡¨ç¤ºå³é”®ï¼Œ2è¡¨ç¤ºä¸­é”®ï¼Œ4æ²¡æœ‰æŒ‰é”®
+	//nAction: 0è¡¨ç¤ºå•å‡»ï¼Œ1è¡¨ç¤ºåŒå‡»ï¼Œ2è¡¨ç¤ºæŒ‰ä¸‹ï¼Œ3è¡¨ç¤ºæ”¾å¼€ï¼Œ4ä¸ä½œå¤„ç†
 	MouseEvent() {
 		nAction = 0;
 		nButton = -1;
 		ptXY.x = 0;
 		ptXY.y = 0;
 	}
-	//nButton£º0±íÊ¾×ó¼ü£¬1±íÊ¾ÓÒ¼ü£¬2±íÊ¾ÖĞ¼ü£¬4Ã»ÓĞ°´¼ü
-	//nAction: 0±íÊ¾µ¥»÷£¬1±íÊ¾Ë«»÷£¬2±íÊ¾°´ÏÂ£¬3±íÊ¾·Å¿ª£¬4²»×÷´¦Àí
+	//nButtonï¼š0è¡¨ç¤ºå·¦é”®ï¼Œ1è¡¨ç¤ºå³é”®ï¼Œ2è¡¨ç¤ºä¸­é”®ï¼Œ4æ²¡æœ‰æŒ‰é”®
+	//nAction: 0è¡¨ç¤ºå•å‡»ï¼Œ1è¡¨ç¤ºåŒå‡»ï¼Œ2è¡¨ç¤ºæŒ‰ä¸‹ï¼Œ3è¡¨ç¤ºæ”¾å¼€ï¼Œ4ä¸ä½œå¤„ç†
 
-	WORD nAction; // µã»÷£¬ÒÆ¶¯£¬Ë«»÷ 
-	WORD nButton; // ×ó¼ü£¬ÓÒ¼ü£¬ÖĞ¼ü
-	POINT ptXY; //×ø±ê
+	WORD nAction; // ç‚¹å‡»ï¼Œç§»åŠ¨ï¼ŒåŒå‡» 
+	WORD nButton; // å·¦é”®ï¼Œå³é”®ï¼Œä¸­é”®
+	POINT ptXY; //åæ ‡
 
 }MOUSEEV, * PMOUSEEV;
 
@@ -149,16 +159,16 @@ typedef struct file_info {
 		HasNext = TRUE;
 		memset(szFileName, 0, sizeof(szFileName));
 	}
-	BOOL IsInvalid; //ÊÇ·ñÓĞĞ§
-	BOOL IsDirectory; // ÊÇ·ñÎªÄ¿Â¼ 0 ·ñ 1 ÊÇ
-	BOOL HasNext; //ÊÇ·ñÓĞºóĞø  0 Ã»ÓĞ 1 ÓĞ
-	char szFileName[256];  //ÎÄ¼şÃû
+	BOOL IsInvalid; //æ˜¯å¦æœ‰æ•ˆ
+	BOOL IsDirectory; // æ˜¯å¦ä¸ºç›®å½• 0 å¦ 1 æ˜¯
+	BOOL HasNext; //æ˜¯å¦æœ‰åç»­  0 æ²¡æœ‰ 1 æœ‰
+	char szFileName[256];  //æ–‡ä»¶å
 }FILEINFO, * PFILEINFO;
 
 void Dump(BYTE* pData, size_t nSize);
 
 enum {
-	CSM_AUTOCLOSE = 1,//CSM = Client Socket Mode ×Ô¶¯¹Ø±ÕÄ£Ê½
+	CSM_AUTOCLOSE = 1,//CSM = Client Socket Mode è‡ªåŠ¨å…³é—­æ¨¡å¼
 };
 
 typedef struct PacketData {
@@ -191,7 +201,7 @@ void Dump(BYTE* pData, size_t nSize);
 class CClientSocket
 {
 public:
-	static CClientSocket* getInstance() {
+	static CClientSocket* getInstance() { //å±€éƒ¨é™æ€å˜é‡å•ä¾‹æ¨¡å¼	
 		if (m_instance == NULL) {
 			m_instance = new CClientSocket();
 		}
@@ -233,7 +243,7 @@ public:
 
 private:
 
-	HANDLE m_eventInvoke;//Æô¶¯ÊÂ¼ş
+	HANDLE m_eventInvoke;//å¯åŠ¨äº‹ä»¶
 	UINT m_nThreadID;
 	typedef void(CClientSocket::* MSGFUNC)(UINT nMsg, WPARAM wParam, LPARAM lParam);
 	std::map<UINT, MSGFUNC> m_mapFunc;
@@ -249,9 +259,9 @@ private:
 	std::vector<char> m_buffer;
 	SOCKET m_sock;
 	CPacket m_packet;
-	CClientSocket& operator=(const CClientSocket& ss) {};
-	CClientSocket(const CClientSocket& ss);
-	CClientSocket();
+	CClientSocket& operator=(const CClientSocket& ss) {}; //ç¦æ­¢èµ‹å€¼
+	CClientSocket(const CClientSocket& ss); //ç¦æ­¢å¤åˆ¶æ„é€ 
+	CClientSocket();  //æ„é€ å‡½æ•°ç§æœ‰åŒ–ï¼Œç¦æ­¢å¤–éƒ¨åˆ›å»ºå¯¹è±¡
 
 	~CClientSocket() {
 		closesocket(m_sock);
@@ -285,7 +295,7 @@ private:
 		return send(m_sock, pData, nSize, 0) > 0;
 	}
 	bool Send(const CPacket& pack);
-	void SendPack(UINT nMsg, WPARAM wParam/*»º³åÇøµÄÖµ*/, LPARAM lParam/*»º³åÇøµÄ³¤¶È*/);
+	void SendPack(UINT nMsg, WPARAM wParam/*ç¼“å†²åŒºçš„å€¼*/, LPARAM lParam/*ç¼“å†²åŒºçš„é•¿åº¦*/);
 
 	static CClientSocket* m_instance;
 	class CHelper
@@ -294,7 +304,7 @@ private:
 		CHelper() {
 		}
 		~CHelper() {
-			CClientSocket::releaseInstance();
+			CClientSocket::releaseInstance(); //ç¨‹åºç»“æŸæ—¶è‡ªåŠ¨è°ƒç”¨ï¼Œé‡Šæ”¾å•ä¾‹å¯¹è±¡
 		}
 
 	};

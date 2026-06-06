@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "pch.h"
 #include "framework.h"
@@ -10,8 +10,7 @@ class CPacket
 public:
 	CPacket()
 		:sHead(0), nLength(0), sCmd(0), sSum(0)
-	{
-	};
+	{};
 	CPacket(WORD nCmd, const BYTE* pData, size_t nSize)
 		: sHead(0xFEFF), nLength(static_cast<DWORD>(nSize + 4)), sCmd(nCmd), sSum(0) {
 		if (nSize > 0) {
@@ -23,7 +22,7 @@ public:
 		}
 
 		for (size_t j = 0; j < strData.size(); j++) {
-			sSum += BYTE(strData[j]) & 0xFF;
+			sSum += BYTE(strData[j]) & 0xFF; 
 		}
 	}
 
@@ -34,42 +33,52 @@ public:
 	CPacket(const BYTE* pData, size_t& nSize)
 		: sHead(0), nLength(0), sCmd(0), sSum(0) {
 		size_t i = 0;
-		//²éÕÒ°üÍ·
-		for (; i < nSize; i++) {  // i + 1 ?
-			if (*(WORD*)(pData + i) == 0xFEFF) {
-				sHead = *(WORD*)(pData + i);
+		if (pData == NULL || nSize < 2) {
+			nSize = 0;
+			return;
+		}
+		//æŸ¥æ‰¾åŒ…å¤´
+		for (; i + sizeof(WORD) <= nSize; i++) {
+			WORD head = 0;
+			memcpy(&head, pData + i, sizeof(head));
+			if (head == 0xFEFF) {
+				sHead = head;
 				i += 2;
 				break;
 			}
 		}
-		// 2. ÖÁÉÙ»¹ÒªÓĞ nLength + sCmd + sSum
-		if (i + 4 + 2 + 2 > nSize) {  //°üÊı¾İ¿ÉÄÜ²»È«£¬»òÕß°üÍ·Î´ÄÜÍêÈ«ÊÕµ½
+		if (sHead != 0xFEFF) {
 			nSize = 0;
 			return;
 		}
-		// 3. ¶ÁÈ¡³¤¶È
-		nLength = *(DWORD*)(pData + i); i += 4;
-		if (nLength + i > nSize) {  //°üÎ´ÍêÈ«ÊÕµ½£¬¾Í·µ»Ø£¬½âÎöÊ§°Ü
+		// 2. è‡³å°‘è¿˜è¦æœ‰ nLength + sCmd + sSum
+		if (i + 4 + 2 + 2 > nSize) {  //åŒ…æ•°æ®å¯èƒ½ä¸å…¨ï¼Œæˆ–è€…åŒ…å¤´æœªèƒ½å®Œå…¨æ”¶åˆ°
 			nSize = 0;
 			return;
 		}
-		// 5. ¶ÁÈ¡ÃüÁî×Ö
-		sCmd = *(WORD*)(pData + i); i += 2;
-		// 6. ¶ÁÈ¡Êı¾İÇø
+		// 3. è¯»å–é•¿åº¦
+		memcpy(&nLength, pData + i, sizeof(nLength)); i += 4;
+		if (nLength < 4 || nLength + i > nSize) {  //åŒ…æœªå®Œå…¨æ”¶åˆ°ï¼Œå°±è¿”å›ï¼Œè§£æå¤±è´¥
+			nSize = 0;
+			return;
+		}
+		// 5. è¯»å–å‘½ä»¤å­—
+		memcpy(&sCmd, pData + i, sizeof(sCmd)); i += 2;
+		// 6. è¯»å–æ•°æ®åŒº
 		if (nLength > 4) {
 			strData.resize(nLength - 2 - 2);
 			memcpy((void*)strData.c_str(), pData + i, nLength - 4);
 			i += nLength - 4;
 		}
-		//7.¶ÁÈ¡Ğ£ÑéºÍ
-		sSum = *(WORD*)(pData + i); i += 2;
+		//7.è¯»å–æ ¡éªŒå’Œ
+		memcpy(&sSum, pData + i, sizeof(sSum)); i += 2;
 
-		// 8. ¼ÆËãĞ£ÑéºÍ
+		// 8. è®¡ç®—æ ¡éªŒå’Œ
 		WORD sum = 0;
 		for (size_t j = 0; j < strData.size(); j++) {
-			sum += BYTE(strData[j]) & 0xFF;
+			sum += BYTE(strData[j]) & 0xFF; // 0xFF æ˜¯ä¸ºäº†ä¿è¯ BYTE è½¬æ¢æˆ WORD åä¸ä¼šæœ‰ç¬¦å·æ‰©å±•
 		}
-		// 9. Ğ£Ñé
+		// 9. æ ¡éªŒ
 		if (sum == sSum) {
 			nSize = i;  //head length data...
 			return;
@@ -90,26 +99,27 @@ public:
 
 	}
 	int Size() {
-		return nLength + 2 + 4; //head length data sum
+		return static_cast<int>(nLength + 2 + 4); //head length data sum
 	}
-	const char* Data() {
-		strOut.resize(nLength + 2 + 4);
-		BYTE* pData = (BYTE*)strOut.c_str();
-		*(WORD*)pData = sHead; pData += 2;
-		*(DWORD*)pData = nLength; pData += 4;
-		*(WORD*)pData = sCmd; pData += 2;
-		memcpy(pData, strData.c_str(), strData.size()); pData += strData.size();
-		*(WORD*)pData = sSum;
-		return strOut.c_str();
+	const char* Data() {  //å°åŒ…
+		// 1. åˆ†é…è¶³å¤Ÿçš„ç©ºé—´ï¼šæ€»å¤§å° = nLength(æ•°æ®åŠå‘½ä»¤å’Œå°¾éƒ¨çš„é•¿åº¦) + 2(åŒ…å¤´) + 4(é•¿åº¦å­—æ®µæœ¬èº«)
+		strOut.resize(nLength + 2 + 4);  //åŒ…å¤´ + é•¿åº¦ + å‘½ä»¤ + æ•°æ® + æ ¡éªŒ
+		BYTE* pData = (BYTE*)strOut.c_str(); 
+		*(WORD*)pData = sHead; pData += 2;  //åŒ…å¤´
+		*(DWORD*)pData = nLength; pData += 4; //é•¿åº¦
+		*(WORD*)pData = sCmd; pData += 2;  //å‘½ä»¤
+		memcpy(pData, strData.c_str(), strData.size()); pData += static_cast<int>(strData.size()); //æ•°æ®
+		*(WORD*)pData = sSum;  //æ ¡éªŒ
+		return strOut.c_str(); //è¿”å›å°åŒ…åçš„æ•°æ®æŒ‡é’ˆ
 	}
 public:
-	//[°üÍ· sHead] [³¤¶È nLength] [ÃüÁî sCmd] [Êı¾İ strData] [Ğ£Ñé sSum]
-	WORD sHead; //¹Ì¶¨Î» FE FF                     2
-	DWORD nLength; //°ü³¤¶È£¨´Ó¿ØÖÆÃüÁî¿ªÊ¼£¬µ½ºÍĞ£Ñé½áÊø£©     4
-	// nLength = 2 + Êı¾İ³¤¶È + 2         ËùÒÔ Êı¾İ³¤¶È = nLength - 4
-	WORD sCmd;  //¿ØÖÆÃüÁî				2
-	std::string strData; //°üÊı¾İ    ²»È·¶¨
-	WORD sSum; //ºÍĞ£Ñé            2
+	//[åŒ…å¤´ sHead] [é•¿åº¦ nLength] [å‘½ä»¤ sCmd] [æ•°æ® strData] [æ ¡éªŒ sSum]
+	WORD sHead; //å›ºå®šä½ FE FF                     2
+	DWORD nLength; //åŒ…é•¿åº¦ï¼ˆä»æ§åˆ¶å‘½ä»¤å¼€å§‹ï¼Œåˆ°å’Œæ ¡éªŒç»“æŸï¼‰     4
+	// nLength = 2 + æ•°æ®é•¿åº¦ + 2         æ‰€ä»¥ æ•°æ®é•¿åº¦ = nLength - 4
+	WORD sCmd;  //æ§åˆ¶å‘½ä»¤				2
+	std::string strData; //åŒ…æ•°æ®    ä¸ç¡®å®š
+	WORD sSum; //å’Œæ ¡éªŒ            2
 	std::string strOut;
 };
 
@@ -123,12 +133,12 @@ typedef struct MouseEvent {
 		ptXY.x = 0;
 		ptXY.y = 0;
 	}
-	//nButton£º0±íÊ¾×ó¼ü£¬1±íÊ¾ÓÒ¼ü£¬2±íÊ¾ÖĞ¼ü£¬4Ã»ÓĞ°´¼ü
-	//nAction: 0±íÊ¾µ¥»÷£¬1±íÊ¾Ë«»÷£¬2±íÊ¾°´ÏÂ£¬3±íÊ¾·Å¿ª£¬4²»×÷´¦Àí
+	//nButtonï¼š0è¡¨ç¤ºå·¦é”®ï¼Œ1è¡¨ç¤ºå³é”®ï¼Œ2è¡¨ç¤ºä¸­é”®ï¼Œ4æ²¡æœ‰æŒ‰é”®
+	//nAction: 0è¡¨ç¤ºå•å‡»ï¼Œ1è¡¨ç¤ºåŒå‡»ï¼Œ2è¡¨ç¤ºæŒ‰ä¸‹ï¼Œ3è¡¨ç¤ºæ”¾å¼€ï¼Œ4ä¸ä½œå¤„ç†
 
-	WORD nAction; // µã»÷£¬ÒÆ¶¯£¬Ë«»÷ 
-	WORD nButton; // ×ó¼ü£¬ÓÒ¼ü£¬ÖĞ¼ü
-	POINT ptXY; //×ø±ê
+	WORD nAction; // ç‚¹å‡»ï¼Œç§»åŠ¨ï¼ŒåŒå‡» 
+	WORD nButton; // å·¦é”®ï¼Œå³é”®ï¼Œä¸­é”®
+	POINT ptXY; //åæ ‡
 
 }MOUSEEV, * PMOUSEEV;
 
@@ -139,8 +149,8 @@ typedef struct file_info {
 		HasNext = TRUE;
 		memset(szFileName, 0, sizeof(szFileName));
 	}
-	BOOL IsInvalid; //ÊÇ·ñÓĞĞ§
-	BOOL IsDirectory; // ÊÇ·ñÎªÄ¿Â¼ 0 ·ñ 1 ÊÇ
-	BOOL HasNext; //ÊÇ·ñÓĞºóĞø  0 Ã»ÓĞ 1 ÓĞ
-	char szFileName[256];  //ÎÄ¼şÃû
+	BOOL IsInvalid; //æ˜¯å¦æœ‰æ•ˆ
+	BOOL IsDirectory; // æ˜¯å¦ä¸ºç›®å½• 0 å¦ 1 æ˜¯
+	BOOL HasNext; //æ˜¯å¦æœ‰åç»­  0 æ²¡æœ‰ 1 æœ‰
+	char szFileName[256];  //æ–‡ä»¶å
 }FILEINFO, * PFILEINFO;

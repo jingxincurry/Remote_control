@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Command.h"
 
 CCommand::CCommand() :threadid(0)
@@ -7,9 +7,9 @@ CCommand::CCommand() :threadid(0)
 		int nCmd;
 		CMDFUNC func;
 	}data[] = {
-		{1, &CCommand::MakeDriverInfo},
-		{2, &CCommand::MakeDirectoryInfo},
-		{3, &CCommand::RunFile},
+		{1, &CCommand::MakeDriverInfo}, //获取驱动信息
+		{2, &CCommand::MakeDirectoryInfo}, //获取目录信息
+		{3, &CCommand::RunFile},  //打开文件
 		{4, &CCommand::DownloadFile},
 		{5, &CCommand::MouseEvent},
 		{6, &CCommand::SendScreen},

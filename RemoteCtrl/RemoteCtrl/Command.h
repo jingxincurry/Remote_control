@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <map>
 #include "Packet.h"
 #include <atlimage.h>
@@ -41,16 +41,16 @@ public:
         if (status > 0) {
 			int ret = thiz->ExcuteCommand(status, lstPacket, inPacket);
             if (ret != 0) {
-                TRACE("Ö´ĞĞÃüÁîÊ§°Ü£º ret=%d\r\n", status, ret);
+                TRACE("æ‰§è¡Œå‘½ä»¤å¤±è´¥ï¼š ret=%d\r\n", status, ret);
             }
         }
         else {
-            MessageBox(NULL, _T("ÎŞ·¨Õı³£½ÓÈëÓÃ»§£¬×Ô¶¯ÖØÊÔ"), _T("½ÓÈëÓÃ»§Ê§°Ü£¡"), MB_OK | MB_ICONERROR);
+            MessageBox(NULL, _T("æ— æ³•æ­£å¸¸æ¥å…¥ç”¨æˆ·ï¼Œè‡ªåŠ¨é‡è¯•"), _T("æ¥å…¥ç”¨æˆ·å¤±è´¥ï¼"), MB_OK | MB_ICONERROR);
         }
     }
 protected:
-	typedef int(CCommand::* CMDFUNC)(std::list<CPacket>&, CPacket& inPacket); //³ÉÔ±º¯ÊıÖ¸Õë
-	std::map<int, CMDFUNC> m_mapFunction; //ÃüÁîÓ³Éä±í
+	typedef int(CCommand::* CMDFUNC)(std::list<CPacket>&, CPacket& inPacket); //æˆå‘˜å‡½æ•°æŒ‡é’ˆ
+	std::map<int, CMDFUNC> m_mapFunction; //å‘½ä»¤æ˜ å°„è¡¨
     CLockDialog dlg;
     unsigned threadid;
 protected:
@@ -73,12 +73,12 @@ protected:
         rect.bottom = GetSystemMetrics(SM_CXFULLSCREEN);
         TRACE("right = %d bottom = %d\r\n", rect.right, rect.bottom);
         //printf("screen width:%d\r\n", rect.right);
-        dlg.MoveWindow(rect); //µ÷Õû¶Ô»°¿ò´óĞ¡ºÍÎ»ÖÃ£¬Ê¹Æä¸²¸ÇÕû¸öÆÁÄ»
-        //´°¿ÚÖÃ¶¥
-        dlg.SetWindowPos(&CWnd::wndTopMost, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE); //×î¶¥²ãÏÔÊ¾
-        //ÏŞÖÆÊó±ê¹¦ÄÜ
-        ShowCursor(FALSE); //Òş²ØÊó±ê
-        //Òş²ØÈÎÎñÀ¸
+        dlg.MoveWindow(rect); //è°ƒæ•´å¯¹è¯æ¡†å¤§å°å’Œä½ç½®ï¼Œä½¿å…¶è¦†ç›–æ•´ä¸ªå±å¹•
+        //çª—å£ç½®é¡¶
+        dlg.SetWindowPos(&CWnd::wndTopMost, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE); //æœ€é¡¶å±‚æ˜¾ç¤º
+        //é™åˆ¶é¼ æ ‡åŠŸèƒ½
+        ShowCursor(FALSE); //éšè—é¼ æ ‡
+        //éšè—ä»»åŠ¡æ 
         ::ShowWindow(::FindWindow(_T("Shell_TrayWnd"), NULL), SW_HIDE);
 
         //dlg.GetWindowRect(rect);
@@ -86,31 +86,31 @@ protected:
         rect.top = 0;
         rect.right = 1;
         rect.bottom = 1;
-        ClipCursor(rect); //ÏŞÖÆÊó±êÔÚ¶Ô»°¿òÄÚÒÆ¶¯
+        ClipCursor(rect); //é™åˆ¶é¼ æ ‡åœ¨å¯¹è¯æ¡†å†…ç§»åŠ¨
 
         MSG msg;
         while (GetMessage(&msg, NULL, 0, 0)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-            if (msg.message == WM_KEYDOWN) { //°´ÏÂÈÎÒâ¼ü£¬½âËø
+            if (msg.message == WM_KEYDOWN) { //æŒ‰ä¸‹ä»»æ„é”®ï¼Œè§£é”
                 TRACE("msg:%08X wparam:%08X lparam:%08X\r\n", msg.message, msg.wParam, msg.lParam);
-                if (msg.wParam == 0x1B) { //°´ÏÂESC¼ü£¬½âËø
+                if (msg.wParam == 0x1B) { //æŒ‰ä¸‹ESCé”®ï¼Œè§£é”
                     break;
                 }
 
             }
         }
         ClipCursor(NULL);
-        ShowCursor(TRUE); //ÏÔÊ¾Êó±ê
-        //ÏÔÊ¾ÈÎÎñÀ¸
+        ShowCursor(TRUE); //æ˜¾ç¤ºé¼ æ ‡
+        //æ˜¾ç¤ºä»»åŠ¡æ 
         ::ShowWindow(::FindWindow(_T("Shell_TrayWnd"), NULL), SW_SHOW);
         dlg.DestroyWindow();
     }
 
     int MakeDriverInfo(std::list<CPacket>& lstPacket, CPacket& inPacket)
-    {
-        std::string result;
-        for (int i = 1; i <= 26; i++) {
+    {   //è·å–å½“å‰ç³»ç»Ÿçš„ç›˜ç¬¦ä¿¡æ¯
+        std::string result;  //ç›˜ç¬¦åˆ—è¡¨
+        for (int i = 1; i <= 26; i++) {  //A-Zç›˜ç¬¦
             if (_chdrive(i) == 0)   // 1==>A  2==>B 3==>C
             {
                 if (result.size() > 0) {
@@ -120,15 +120,15 @@ protected:
 
             }
         }
-		lstPacket.push_back(CPacket(1, (BYTE*)result.c_str(), result.size()));
+		lstPacket.push_back(CPacket(1, (BYTE*)result.c_str(), result.size())); //å‘é€ç›˜ç¬¦åˆ—è¡¨åˆ°æ§åˆ¶ç«¯
         return 0;
     }
 
     int MakeDirectoryInfo(std::list<CPacket>& lstPacket, CPacket& inPacket) {
-        std::string strPath = inPacket.strData;
+        std::string strPath = inPacket.strData; //ç›®å½•è·¯å¾„
         //std::list<FILEINFO> listFileInfos;
         
-        if (_chdir(strPath.c_str()) != 0) {   //ÎŞĞ§Ä¿Â¼
+        if (_chdir(strPath.c_str()) != 0) {   //æ— æ•ˆç›®å½•
             FILEINFO finfo;
             finfo.IsInvalid = TRUE;
             finfo.IsDirectory = TRUE;
@@ -137,25 +137,26 @@ protected:
             //listFileInfos.push_back(finfo);
 			lstPacket.push_back(CPacket(2, (BYTE*)&finfo, sizeof(finfo)));
            
-            OutputDebugString(_T("Ã»ÓĞÈ¨ÏŞ£¬·ÃÎÊÄ¿Â¼"));
+            OutputDebugString(_T("æ²¡æœ‰æƒé™ï¼Œè®¿é—®ç›®å½•"));
             return -2;
         }
-        _finddata_t fdata;
-        int hfind = 0;
-        if ((hfind = _findfirst("*", &fdata)) == -1) {
+        _finddata_t fdata; //æ–‡ä»¶ä¿¡æ¯ç»“æ„ä½“
+        intptr_t hfind = 0;
+        if ((hfind = _findfirst("*", &fdata)) == -1) { 
             FILEINFO finfo;
-            OutputDebugString(_T("Ã»ÓĞÕÒµ½ÈÎºÎÎÄ¼ş£¡"));
+            OutputDebugString(_T("æ²¡æœ‰æ‰¾åˆ°ä»»ä½•æ–‡ä»¶ï¼"));
             lstPacket.push_back(CPacket(2, (BYTE*)&finfo, sizeof(finfo)));
             return -3;
         }
         do {
             FILEINFO finfo;
-            finfo.IsDirectory = (fdata.attrib & _A_SUBDIR) != 0;
-            memcpy(finfo.szFileName, fdata.name, sizeof(finfo.szFileName));
+            finfo.IsDirectory = (fdata.attrib & _A_SUBDIR) != 0; //æ˜¯å¦æ˜¯ç›®å½•
+            strncpy_s(finfo.szFileName, fdata.name, sizeof(finfo.szFileName) - 1); //æ–‡ä»¶å
             //listFileInfos.push_back(finfo);
-            lstPacket.push_back(CPacket(2, (BYTE*)&finfo, sizeof(finfo)));
+            lstPacket.push_back(CPacket(2, (BYTE*)&finfo, sizeof(finfo))); //å‘é€æ–‡ä»¶ä¿¡æ¯åˆ°æ§åˆ¶ç«¯
         } while (!_findnext(hfind, &fdata));
-        //·¢ËÍĞÅÏ¢µ½¿ØÖÆ¶Ë
+        _findclose(hfind);
+        //å‘é€ä¿¡æ¯åˆ°æ§åˆ¶ç«¯
         FILEINFO finfo;
         finfo.HasNext = FALSE;
         lstPacket.push_back(CPacket(2, (BYTE*)&finfo, sizeof(finfo)));
@@ -164,14 +165,14 @@ protected:
 
     int RunFile(std::list<CPacket>& lstPacket, CPacket& inPacket) {
         std::string strPath = inPacket.strData;
-        std::wstring widePath = AnsiPathToWide(strPath);
-        ShellExecuteW(NULL, NULL, widePath.c_str(), NULL, NULL, SW_SHOW);
+		std::wstring widePath = AnsiPathToWide(strPath); //å°†ANSIè·¯å¾„è½¬æ¢ä¸ºå®½å­—ç¬¦è·¯å¾„
+		ShellExecuteW(NULL, NULL, widePath.c_str(), NULL, NULL, SW_SHOW); //ä½¿ç”¨ShellExecuteWå‡½æ•°è¿è¡Œæ–‡ä»¶
         lstPacket.push_back(CPacket(3, NULL, 0));
         return 0;
     }
 
     int DownloadFile(std::list<CPacket>& lstPacket, CPacket& inPacket) {
-        std::string strPath = inPacket.strData;
+        std::string strPath = inPacket.strData; 
         long long data = 0;
         FILE* fp = NULL;
         std::wstring widePath = AnsiPathToWide(strPath);
@@ -183,10 +184,10 @@ protected:
         }
 
         if (fp != NULL) {
-            fseek(fp, 0, SEEK_END);
-            data = _ftelli64(fp);
-            lstPacket.push_back(CPacket(4, (BYTE*)&data, 8));
-            fseek(fp, 0, SEEK_SET);
+			fseek(fp, 0, SEEK_END); //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆåˆ°æ–‡ä»¶æœ«å°¾
+			data = _ftelli64(fp); //è·å–æ–‡ä»¶å¤§å°
+			lstPacket.push_back(CPacket(4, (BYTE*)&data, 8)); //å‘é€æ–‡ä»¶å¤§å°åˆ°æ§åˆ¶ç«¯
+			fseek(fp, 0, SEEK_SET); //ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆå›æ–‡ä»¶å¼€å¤´
             char buffer[1024];
             size_t nSize = 0;
             do {
@@ -194,7 +195,7 @@ protected:
                 if (nSize > 0) {
                     lstPacket.push_back(CPacket(4, (BYTE*)&buffer, nSize));
                 }
-            } while (nSize >= 1024); //1024×Ö½ÚÎªÒ»¸ö°ü,¶Á
+            } while (nSize >= 1024); //1024å­—èŠ‚ä¸ºä¸€ä¸ªåŒ…,è¯»
             fclose(fp);
         }
         else {
@@ -206,91 +207,91 @@ protected:
     }
     
     int MouseEvent(std::list<CPacket>& lstPacket, CPacket& inPacket) {
-        MOUSEEV mouse;
-		memcpy(&mouse, inPacket.strData.c_str(), sizeof(MOUSEEV));
+		MOUSEEV mouse; //é¼ æ ‡äº‹ä»¶ç»“æ„ä½“
+		memcpy(&mouse, inPacket.strData.c_str(), sizeof(MOUSEEV)); //ä»è¾“å…¥åŒ…ä¸­æå–é¼ æ ‡äº‹ä»¶ä¿¡æ¯
         TRACE("mouse x=%d y=%d button=%d action=%d\r\n",
             mouse.ptXY.x, mouse.ptXY.y, mouse.nButton, mouse.nAction);
         
         DWORD nFlags = 0;
         switch (mouse.nButton)
         {
-        case 0: //×ó¼ü
+        case 0: //å·¦é”®
             nFlags = 1;
             break;
-        case 1: //ÓÒ¼ü
+        case 1: //å³é”®
             nFlags = 2;
             break;
-        case 2: //ÖĞ¼ü
+        case 2: //ä¸­é”®
             nFlags = 4;
             break;
-        case 4: //Ã»ÓĞ°´¼ü
+        case 4: //æ²¡æœ‰æŒ‰é”®
             nFlags = 8;
             break;
         }
         SetCursorPos(mouse.ptXY.x, mouse.ptXY.y);
         switch (mouse.nAction)
         {
-        case 0: //µ¥»÷
+        case 0: //å•å‡»
             nFlags |= 0x10;
             break;
-        case 1: //Ë«»÷
+        case 1: //åŒå‡»
             nFlags |= 0x20;
             break;
-        case 2: //°´ÏÂ
+        case 2: //æŒ‰ä¸‹
             nFlags |= 0x40;
             break;
-        case 3: //·Å¿ª
+        case 3: //æ”¾å¼€
             nFlags |= 0x80;
             break;
-        case 4: //ÒÆ¶¯
+        case 4: //ç§»åŠ¨
             break;
-        default: //²»×÷´¦Àí 
+        default: //ä¸ä½œå¤„ç† 
             break;
         }
         switch (nFlags) {
-        case 0x21: //×ó¼üË«»÷
+        case 0x21: //å·¦é”®åŒå‡»
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, GetMessageExtraInfo());
             mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, GetMessageExtraInfo());
-        case 0x11: //×ó¼üµ¥»÷
+        case 0x11: //å·¦é”®å•å‡»
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, GetMessageExtraInfo());
             mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, GetMessageExtraInfo());
             break;
 
-        case 0x41: //×ó¼ü°´ÏÂ
+        case 0x41: //å·¦é”®æŒ‰ä¸‹
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, GetMessageExtraInfo());
             break;
-        case 0x81: //×ó¼ü·Å¿ª
+        case 0x81: //å·¦é”®æ”¾å¼€
             mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, GetMessageExtraInfo());
             break;
 
-        case 0x22: //ÓÒ¼üË«»÷
+        case 0x22: //å³é”®åŒå‡»
             mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, GetMessageExtraInfo());
             mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, GetMessageExtraInfo());
-        case 0x12: //ÓÒ¼üµ¥»÷
+        case 0x12: //å³é”®å•å‡»
             mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, GetMessageExtraInfo());
             mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, GetMessageExtraInfo());
             break;
-        case 0x42: //ÓÒ¼ü°´ÏÂ
+        case 0x42: //å³é”®æŒ‰ä¸‹
             mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, GetMessageExtraInfo());
             break;
-        case 0x82: //ÓÒ¼ü·Å¿ª
+        case 0x82: //å³é”®æ”¾å¼€
             mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, GetMessageExtraInfo());
             break;
 
-        case 0x24: //ÖĞ¼üË«»÷
+        case 0x24: //ä¸­é”®åŒå‡»
             mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, GetMessageExtraInfo());
             mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, GetMessageExtraInfo());
-        case 0x14: //ÖĞ¼üµ¥»÷
+        case 0x14: //ä¸­é”®å•å‡»
             mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, GetMessageExtraInfo());
             mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, GetMessageExtraInfo());
             break;
-        case 0x44: //ÖĞ¼ü°´ÏÂ
+        case 0x44: //ä¸­é”®æŒ‰ä¸‹
             mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, GetMessageExtraInfo());
             break;
-        case 0x84: //ÖĞ¼ü·Å¿ª
+        case 0x84: //ä¸­é”®æ”¾å¼€
             mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, GetMessageExtraInfo());
             break;
-        case 0x08: //Êó±êÒÆ¶¯
+        case 0x08: //é¼ æ ‡ç§»åŠ¨
             break;
         }
         lstPacket.push_back(CPacket(5, NULL, 0));
@@ -304,31 +305,31 @@ protected:
     int SendScreen(std::list<CPacket>& lstPacket, CPacket& inPacket) {
         CImage screen; //GDI
         HDC hScreen = GetDC(NULL);
-        int nBitPerPixel = GetDeviceCaps(hScreen, BITSPIXEL);  //ÆÁÄ»Î»Éî
-        int nWidth = GetDeviceCaps(hScreen, HORZRES);  //ÆÁÄ»¿í¸ß
-        int nHeight = GetDeviceCaps(hScreen, VERTRES); //ÆÁÄ»¿í¸ß
-        screen.Create(nWidth, nHeight, nBitPerPixel); //´´½¨Ò»¸öÓëÆÁÄ»µÈ´óµÄÍ¼Ïñ
+        int nBitPerPixel = GetDeviceCaps(hScreen, BITSPIXEL);  //å±å¹•ä½æ·±
+        int nWidth = GetDeviceCaps(hScreen, HORZRES);  //å±å¹•å®½é«˜
+        int nHeight = GetDeviceCaps(hScreen, VERTRES); //å±å¹•å®½é«˜
+        screen.Create(nWidth, nHeight, nBitPerPixel); //åˆ›å»ºä¸€ä¸ªä¸å±å¹•ç­‰å¤§çš„å›¾åƒ
 
-        BitBlt(screen.GetDC(), 0, 0, nWidth, nHeight, hScreen, 0, 0, SRCCOPY); //½«ÆÁÄ»ÄÚÈİ¸´ÖÆµ½Í¼ÏñÖĞ
+        BitBlt(screen.GetDC(), 0, 0, nWidth, nHeight, hScreen, 0, 0, SRCCOPY); //å°†å±å¹•å†…å®¹å¤åˆ¶åˆ°å›¾åƒä¸­
         ReleaseDC(NULL, hScreen);
 
-        HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, 0);  //ÄÜµ÷Õû´óĞ¡µÄ ÔÚÄÚ´æÖĞ·ÖÅäÒ»¸ö¿é
+        HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, 0);  //èƒ½è°ƒæ•´å¤§å°çš„ åœ¨å†…å­˜ä¸­åˆ†é…ä¸€ä¸ªå—
         if (hMem == NULL) {
-            OutputDebugString(_T("ÄÚ´æ·ÖÅäÊ§°Ü£¡"));
+            OutputDebugString(_T("å†…å­˜åˆ†é…å¤±è´¥ï¼"));
             return -1;
         }
-        IStream* pStream = NULL;
-        HRESULT ret = CreateStreamOnHGlobal(hMem, TRUE, &pStream); //´´½¨Ò»¸öÁ÷¶ÔÏó£¬¹ØÁªµ½ÄÚ´æ¿éÉÏ
+		IStream* pStream = NULL; //åˆ›å»ºä¸€ä¸ªå†…å­˜æµå¯¹è±¡
+        HRESULT ret = CreateStreamOnHGlobal(hMem, TRUE, &pStream); //åˆ›å»ºä¸€ä¸ªæµå¯¹è±¡ï¼Œå…³è”åˆ°å†…å­˜å—ä¸Š
         if (ret == S_OK) {
-            screen.Save(pStream, Gdiplus::ImageFormatPNG); //½«Í¼ÏñÒÔPNG¸ñÊ½±£´æµ½Á÷ÖĞ
-            //»ñÈ¡Á÷ÖĞµÄÊı¾İ
+            screen.Save(pStream, Gdiplus::ImageFormatPNG); //å°†å›¾åƒä»¥PNGæ ¼å¼ä¿å­˜åˆ°æµä¸­
+            //è·å–æµä¸­çš„æ•°æ®
 
             LARGE_INTEGER liZero = {};
-            pStream->Seek(liZero, STREAM_SEEK_SET, NULL); //½«Á÷µÄÖ¸ÕëÒÆµ½¿ªÍ·
-            PBYTE pData = (PBYTE)GlobalLock(hMem); //Ëø¶¨ÄÚ´æ¿é£¬»ñÈ¡Ö¸ÏòÊı¾İµÄÖ¸Õë
-            SIZE_T nSize = GlobalSize(hMem); //»ñÈ¡ÄÚ´æ¿éµÄ´óĞ¡
+            pStream->Seek(liZero, STREAM_SEEK_SET, NULL); //å°†æµçš„æŒ‡é’ˆç§»åˆ°å¼€å¤´
+            PBYTE pData = (PBYTE)GlobalLock(hMem); //é”å®šå†…å­˜å—ï¼Œè·å–æŒ‡å‘æ•°æ®çš„æŒ‡é’ˆ
+            SIZE_T nSize = GlobalSize(hMem); //è·å–å†…å­˜å—çš„å¤§å°
             lstPacket.push_back(CPacket(6, pData, nSize));
-            GlobalUnlock(hMem); //½âËøÄÚ´æ¿é
+            GlobalUnlock(hMem); //è§£é”å†…å­˜å—
 
         }
 

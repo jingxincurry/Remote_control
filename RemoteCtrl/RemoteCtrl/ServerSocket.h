@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 
 #include <list>
@@ -56,16 +56,13 @@ private:
 	SOCKET m_client;
 	SOCKET m_sock;
 	CPacket m_packet;
-	CServerSocket& operator=(const CServerSocket& ss) {};
-	CServerSocket(const CServerSocket& ss) {
-		m_client = ss.m_client;
-		m_sock = ss.m_sock;
-	};
+	CServerSocket& operator=(const CServerSocket& ss) = delete;
+	CServerSocket(const CServerSocket& ss) = delete;
 	CServerSocket() {
 		
 		m_client = INVALID_SOCKET; // -1
 		if (InitSockEnv() == FALSE) {
-			MessageBox(NULL, _T("ÎŞ·¨³õÊ¼»¯Ì×½Ó×Ö»·¾³, Çë¼ì²éÍøÂçÉèÖÃ£¡"), _T("³õÊ¼»¯´íÎó£¡"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, _T("æ— æ³•åˆå§‹åŒ–å¥—æ¥å­—ç¯å¢ƒ, è¯·æ£€æŸ¥ç½‘ç»œè®¾ç½®ï¼"), _T("åˆå§‹åŒ–é”™è¯¯ï¼"), MB_OK | MB_ICONERROR);
 			exit(0);
 		}
 		m_sock = socket(PF_INET, SOCK_STREAM, 0);;

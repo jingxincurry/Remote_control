@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "MirrorServer.h"
 #include "MirrorTool.h"
 #pragma warning(disable:4407)
@@ -16,7 +16,7 @@ template<MirrorOperator op>
 int AcceptOverlapped<op>::AcceptWorker() {
 	TRACE("AcceptWorker this %08X\r\n", this);
 	INT lLength = 0, rLength = 0;
-	if (m_client->GetBufferSize() > 0) {
+	if (m_client != NULL) {
 		LPSOCKADDR pLocalAddr, pRemoteAddr;
 		GetAcceptExSockaddrs(*m_client, 0,
 			sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16,
@@ -26,10 +26,8 @@ int AcceptOverlapped<op>::AcceptWorker() {
 		memcpy(m_client->GetLocalAddr(), pLocalAddr, sizeof(sockaddr_in));
 		memcpy(m_client->GetRemoteAddr(), pRemoteAddr, sizeof(sockaddr_in));
 		m_server->BindNewSocket(*m_client, (ULONG_PTR)m_client);
-		int ret = WSARecv((SOCKET)*m_client, m_client->RecvWSABuffer(), 1, *m_client, &m_client->flags(), m_client->RecvOverlapped(), NULL);
-		if (ret == SOCKET_ERROR && (WSAGetLastError() != WSA_IO_PENDING)) {
-			TRACE("WSARecv failed %d\r\n", ret);
-		}
+		m_client->ResetBuffer();
+		m_client->PostRecv();
 		if (!m_server->NewAccept()) {
 			return -2;
 		}
@@ -112,14 +110,56 @@ LPOVERLAPPED MirrorClient::SendOverlapped()
 	return &m_send->m_overlapped;
 }
 
-int MirrorClient::Recv()
+void MirrorClient::ResetBuffer()
 {
-	int ret = recv(m_sock, m_buffer.data() + m_used, (int)(m_buffer.size() - m_used), 0);
-	if (ret <= 0) {
+	m_used = 0;
+	m_received = 0;
+	m_flags = 0;
+	memset(m_buffer.data(), 0, m_buffer.size());
+}
+
+int MirrorClient::PostRecv()
+{
+	if (m_sock == INVALID_SOCKET || m_used >= m_buffer.size()) {
 		return -1;
 	}
-	m_used += (size_t)ret;
-	CMirrorTool::Dump((BYTE*)m_buffer.data(), ret);
+
+	m_recv->m_wsabuffer.buf = m_buffer.data() + m_used;
+	m_recv->m_wsabuffer.len = (ULONG)(m_buffer.size() - m_used);
+	m_received = 0;
+	m_flags = 0;
+	memset(&m_recv->m_overlapped, 0, sizeof(m_recv->m_overlapped));
+
+	int ret = WSARecv(m_sock, RecvWSABuffer(), 1, &m_received, &m_flags, RecvOverlapped(), NULL);
+	if (ret == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING) {
+		TRACE("WSARecv failed %d\r\n", WSAGetLastError());
+		return -1;
+	}
+	return 0;
+}
+
+int MirrorClient::Recv(MirrorServer* server)
+{
+	if (m_received <= 0) {
+		Close();
+		return -1;
+	}
+	m_used += (size_t)m_received;
+	CMirrorTool::Dump((BYTE*)m_buffer.data(), m_used);
+
+	size_t packetSize = m_used;
+	CPacket packet((BYTE*)m_buffer.data(), packetSize);
+	if (packetSize == 0) {
+		if (m_used >= m_buffer.size()) {
+			Close();
+			return -1;
+		}
+		return PostRecv();
+	}
+	if (packetSize > 0 && packet.sCmd > 0) {
+		server->DealCommand(this, packet);
+	}
+	Close();
 	return 0;
 }
 
@@ -131,6 +171,21 @@ int MirrorClient::Send(void* buffer, size_t nSize)
 		return 0;
 	}
 	return -1;
+}
+
+int MirrorClient::SendPacket(CPacket& pack)
+{
+	const char* data = pack.Data();
+	int total = pack.Size();
+	int sent = 0;
+	while (sent < total) {
+		int ret = send(m_sock, data + sent, total - sent, 0);
+		if (ret <= 0) {
+			return -1;
+		}
+		sent += ret;
+	}
+	return sent;
 }
 
 int MirrorClient::SendData(std::vector<char>& data)
@@ -151,8 +206,17 @@ int MirrorClient::SendData(std::vector<char>& data)
 	return 0;
 }
 
+void MirrorClient::Close()
+{
+	if (m_sock != INVALID_SOCKET) {
+		closesocket(m_sock);
+		m_sock = INVALID_SOCKET;
+	}
+}
+
 MirrorServer::~MirrorServer()
 {
+	StopService();
 	std::map<SOCKET, MirrorClient*>::iterator it = m_client.begin();
 	for (; it != m_client.end(); it++) {
 		delete it->second;
@@ -161,8 +225,25 @@ MirrorServer::~MirrorServer()
 	m_client.clear();
 }
 
-bool MirrorServer::StartService()
+void MirrorServer::StopService()
 {
+	HANDLE hIOCP = m_hIOCP;
+	m_hIOCP = INVALID_HANDLE_VALUE;
+
+	if (m_sock != INVALID_SOCKET) {
+		closesocket(m_sock);
+		m_sock = INVALID_SOCKET;
+	}
+
+	if (hIOCP != INVALID_HANDLE_VALUE && hIOCP != NULL) {
+		PostQueuedCompletionStatus(hIOCP, 0, 0, NULL);
+	}
+}
+
+bool MirrorServer::StartService(MIRROR_SOCK_CALLBACK callback, void* arg)
+{
+	m_callback = callback;
+	m_arg = arg;
 	CreateSocket();
 	if (bind(m_sock, (sockaddr*)&m_addr, sizeof(m_addr)) == -1) {
 		TRACE("bind failed %d\r\n", WSAGetLastError());
@@ -174,20 +255,35 @@ bool MirrorServer::StartService()
 		m_sock = INVALID_SOCKET;
 		return false;
 	}
-	m_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+	m_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0); //创建完成端口
 	if (m_hIOCP == NULL) {
 		closesocket(m_sock);
 		m_sock = INVALID_SOCKET;
 		m_hIOCP = INVALID_HANDLE_VALUE;
 		return false;
 	}
-	CreateIoCompletionPort((HANDLE)m_sock, m_hIOCP, ListenerCompletionKey(), 0);
-	m_pool.Invoke();
-	m_pool.DispatchWorker(ThreadWorker(this, (FUNCTYPE)&MirrorServer::threadIocp));
+	CreateIoCompletionPort((HANDLE)m_sock, m_hIOCP, ListenerCompletionKey(), 0);  //完成端口与socket关联
+	m_pool.Invoke(); 
+	m_pool.DispatchWorker(ThreadWorker(this, (FUNCTYPE)&MirrorServer::threadIocp)); //启动线程池
 	if (!NewAccept()) {
 		return false;
 	}
 	return true;
+}
+
+int MirrorServer::DealCommand(MirrorClient* client, CPacket& inPacket)
+{
+	if (m_callback == NULL || client == NULL) {
+		return -1;
+	}
+
+	std::list<CPacket> lstPacket;
+	m_callback(m_arg, inPacket.sCmd, lstPacket, inPacket);
+	while (!lstPacket.empty()) {
+		client->SendPacket(lstPacket.front());
+		lstPacket.pop_front();
+	}
+	return 0;
 }
 
 void MirrorServer::BindNewSocket(SOCKET s, ULONG_PTR nKey)
@@ -202,15 +298,28 @@ int MirrorServer::threadIocp()
 		ULONG_PTR CompletionKey = 0;
 		OVERLAPPED* lpOverlapped = NULL;
 		if (!GetQueuedCompletionStatus(m_hIOCP, &tranferred, &CompletionKey, &lpOverlapped, INFINITE)) {
-			TRACE("GetQueuedCompletionStatus failed %d\r\n", WSAGetLastError());
+			DWORD error = WSAGetLastError();
+			if (error == ERROR_OPERATION_ABORTED || error == ERROR_ABANDONED_WAIT_0 || m_hIOCP == INVALID_HANDLE_VALUE) {
+				break;
+			}
+			TRACE("GetQueuedCompletionStatus failed %d\r\n", error);
 			continue;
 		}
 		if (CompletionKey == 0 || lpOverlapped == NULL) {
-			continue;
+			break;
 		}
 
 		MirrorOverlapped* pOverlapped = CONTAINING_RECORD(lpOverlapped, MirrorOverlapped, m_overlapped);
 		pOverlapped->m_server = this;
+		if (tranferred == 0 && pOverlapped->m_operator != EAccept) {
+			if (pOverlapped->m_client != NULL) {
+				pOverlapped->m_client->Close();
+			}
+			continue;
+		}
+		if (pOverlapped->m_client != NULL) {
+			pOverlapped->m_client->SetReceived(tranferred);
+		}
 		TRACE("Operator is %d\r\n", pOverlapped->m_operator);
 		switch (pOverlapped->m_operator) {
 		case EAccept:
