@@ -333,8 +333,7 @@ protected:
 
         }
 
-        pStream->Release();
-        GlobalFree(hMem);
+        pStream->Release(); // fDeleteOnRelease=TRUE, stream已释放hMem
         screen.ReleaseDC();
         return 0;
     }

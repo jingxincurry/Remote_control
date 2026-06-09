@@ -154,13 +154,14 @@ int MirrorClient::Recv(MirrorServer* server)
 			Close();
 			return -1;
 		}
-		return PostRecv();
+		PostRecv();
+		return -1;
 	}
 	if (packetSize > 0 && packet.sCmd > 0) {
 		server->DealCommand(this, packet);
 	}
 	Close();
-	return 0;
+	return -1;
 }
 
 int MirrorClient::Send(void* buffer, size_t nSize)

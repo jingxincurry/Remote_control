@@ -212,7 +212,7 @@ protected:
 			delete Param;
 			return false;
 		}
-		bool ret = PostQueuedCompletionStatus(CMirrorQueue<T>::m_hCompeletionPort, sizeof(typename CMirrorQueue<T>::PPARAM), (ULONG_PTR)&Param, NULL);
+		bool ret = PostQueuedCompletionStatus(CMirrorQueue<T>::m_hCompeletionPort, sizeof(typename CMirrorQueue<T>::PPARAM), (ULONG_PTR)Param, NULL);
 		if (ret == false) {
 			delete Param;
 			return false;
