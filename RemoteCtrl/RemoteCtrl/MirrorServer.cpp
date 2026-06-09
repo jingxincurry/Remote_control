@@ -264,8 +264,8 @@ bool MirrorServer::StartService(MIRROR_SOCK_CALLBACK callback, void* arg)
 		return false;
 	}
 	CreateIoCompletionPort((HANDLE)m_sock, m_hIOCP, ListenerCompletionKey(), 0);  //完成端口与socket关联
-	m_pool.Invoke(); 
-	m_pool.DispatchWorker(ThreadWorker(this, (FUNCTYPE)&MirrorServer::threadIocp)); //启动线程池
+	m_pool.Invoke();  //启动线程池
+	m_pool.DispatchWorker(ThreadWorker(this, (FUNCTYPE)&MirrorServer::threadIocp)); //分配线程池中的一个线程来执行MirrorServer::threadIocp函数，处理IOCP事件
 	if (!NewAccept()) {
 		return false;
 	}
