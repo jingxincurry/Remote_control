@@ -1,87 +1,14 @@
-#pragma once
+ï»¿#pragma once
 
-#include "pch.h"
-#include "framework.h"
 
-class CPacket
-{
-public:
-	CPacket()
-		:sHead(0), nLength(0), sCmd(0), sSum(0) 
-	{};
-	CPacket(const CPacket& pack) {
-		sHead = pack.sHead;
-		nLength = pack.nLength;
-		sCmd = pack.sCmd;
-		strData = pack.strData;
-		sSum = pack.sSum;
-	}
-	CPacket(const BYTE* pData, size_t& nSize) {
-		size_t i = 0;
-		//²éÕÒ°üÍ·
-		for (; i < nSize; i++) {  // i + 1 ?
-			if (*(WORD*)(pData + i) == 0xFEFF) {
-				sHead = *(WORD*)(pData + i);
-				i += 2;
-				break;
-			}
-		}
-		// 2. ÖÁÉÙ»¹ÒªÓĞ nLength + sCmd + sSum
-		if (i + 4 + 2 + 2 > nSize) {  //°üÊı¾İ¿ÉÄÜ²»È«£¬»òÕß°üÍ·Î´ÄÜÍêÈ«ÊÕµ½
-			nSize = 0;
-			return;
-		}
-		// 3. ¶ÁÈ¡³¤¶È
-		nLength = *(DWORD*)(pData + i); i += 4;  
-		if (nLength + i > nSize) {  //°üÎ´ÍêÈ«ÊÕµ½£¬¾Í·µ»Ø£¬½âÎöÊ§°Ü
-			nSize = 0;
-			return;
-		}
-		// 5. ¶ÁÈ¡ÃüÁî×Ö
-		sCmd = *(WORD*)(pData + i); i += 2;
-		// 6. ¶ÁÈ¡Êı¾İÇø
-		if (nLength > 4) {
-			strData.resize(nLength - 2 - 2);
-			memcpy((void*)strData.c_str(), pData + i, nLength - 4);
-			i += nLength - 4;
-		}
-		//7.¶ÁÈ¡Ğ£ÑéºÍ
-		sSum = *(WORD*)(pData + i); i += 2;
-		
-		// 8. ¼ÆËãĞ£ÑéºÍ
-		WORD sum = 0;
-		for (size_t j = 0; j < strData.size(); j++) {
-			sum += BYTE(strData[j]) & 0xFF;
-		}
-		// 9. Ğ£Ñé
-		if (sum == sSum) {
-			nSize = i;  //head length data...
-			return;
-		}
-		nSize = 0;
+#include <list>
+#include "Packet.h"
 
-	}
-	~CPacket() {};
-	CPacket& operator=(const CPacket& pack) {
-		if (this != &pack) {
-			sHead = pack.sHead;
-			nLength = pack.nLength;
-			sCmd = pack.sCmd;
-			strData = pack.strData;
-			sSum = pack.sSum;
-		}
-		return *this;
-		
-	}
-public:
-	//[°üÍ· sHead] [³¤¶È nLength] [ÃüÁî sCmd] [Êı¾İ strData] [Ğ£Ñé sSum]
-	WORD sHead; //¹Ì¶¨Î» FE FF                     2
-	DWORD nLength; //°ü³¤¶È£¨´Ó¿ØÖÆÃüÁî¿ªÊ¼£¬µ½ºÍĞ£Ñé½áÊø£©     4
-	// nLength = 2 + Êı¾İ³¤¶È + 2         ËùÒÔ Êı¾İ³¤¶È = nLength - 4
-	WORD sCmd;  //¿ØÖÆÃüÁî				2
-	std::string strData; //°üÊı¾İ    ²»È·¶¨
-	WORD sSum; //ºÍĞ£Ñé            2
-};
+
+
+
+
+typedef void (*SOCK_CALLBACK)(void* arg, int, std::list<CPacket>&, CPacket&);
 
 
 class CServerSocket
@@ -92,9 +19,13 @@ public:
 			m_instance = new CServerSocket();
 		}
 		return m_instance;
+
 	};
 
-	bool InitSocket();
+	int Run(SOCK_CALLBACK callback, void* arg, short port);
+protected:
+
+	bool InitSocket(short port);
 
 	bool AcceptClient();
 
@@ -102,20 +33,36 @@ public:
 
 	bool Send(const char* pData, int nSize);
 
+	bool Send(CPacket& pack);
+
+	bool GetFilePath(std::string& strPath);
+
+	bool GetMouseEvent(MOUSEEV& mouse);
+	
+	CPacket& GetPacket()
+	{
+		return m_packet;
+	}
+
+	void CloseClient() {
+		if (m_client != INVALID_SOCKET) {
+			closesocket(m_client);
+			m_client = INVALID_SOCKET;
+		}
+	}
 private:
+	SOCK_CALLBACK m_callback;
+	void* m_arg;
 	SOCKET m_client;
 	SOCKET m_sock;
 	CPacket m_packet;
-	CServerSocket& operator=(const CServerSocket& ss) {};
-	CServerSocket(const CServerSocket& ss) {
-		m_client = ss.m_client;
-		m_sock = ss.m_sock;
-	};
+	CServerSocket& operator=(const CServerSocket& ss) = delete;
+	CServerSocket(const CServerSocket& ss) = delete;
 	CServerSocket() {
 		
 		m_client = INVALID_SOCKET; // -1
 		if (InitSockEnv() == FALSE) {
-			MessageBox(NULL, _T("ÎŞ·¨³õÊ¼»¯Ì×½Ó×Ö»·¾³, Çë¼ì²éÍøÂçÉèÖÃ£¡"), _T("³õÊ¼»¯´íÎó£¡"), MB_OK | MB_ICONERROR);
+			MessageBox(NULL, _T("æ— æ³•åˆå§‹åŒ–å¥—æ¥å­—ç¯å¢ƒ, è¯·æ£€æŸ¥ç½‘ç»œè®¾ç½®ï¼"), _T("åˆå§‹åŒ–é”™è¯¯ï¼"), MB_OK | MB_ICONERROR);
 			exit(0);
 		}
 		m_sock = socket(PF_INET, SOCK_STREAM, 0);;
